@@ -15,11 +15,11 @@ VALUES
 (3, 'Sushi Master', 'Kantstraße 3', '10623', 'Premium sushi and Japanese specialties', 'resto3', 0.00);
 
 -- Add test customers
-INSERT INTO customers (id, first_name, last_name, street, postal_code, password_hash, balance)
+INSERT INTO customers (id, username, first_name, last_name, street, postal_code, password_hash, balance)
 VALUES 
-(1, 'Max', 'Mustermann', 'Alexanderplatz 1', '10178', 'user1', 100.00),
-(2, 'Anna', 'Schmidt', 'Potsdamer Platz 2', '10785', 'user2', 100.00),
-(3, 'Leon', 'Weber', 'Kurfürstendamm 3', '10719', 'user3', 100.00);
+(1,'maxi2', 'Max', 'Mustermann', 'Alexanderplatz 1', '10178', 'user1', 100.00),
+(2,'annasch', 'Anna', 'Schmidt', 'Potsdamer Platz 2', '10785', 'user2', 100.00),
+(3,'leoni', 'Leon', 'Weber', 'Kurfürstendamm 3', '10719', 'user3', 100.00);
 
 -- Add menu items for Bella Italia with a comprehensive Italian menu
 INSERT INTO menu_items (restaurant_id, name, description, price, is_available)

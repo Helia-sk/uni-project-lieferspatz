@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS delivery_areas (
 
 CREATE TABLE IF NOT EXISTS customers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   street TEXT NOT NULL,
