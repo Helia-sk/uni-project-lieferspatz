@@ -15,7 +15,7 @@ const RestaurantLogin = () => {
       console.log("registration");
       // Handle restaurant registration
       await registerRestaurantWithData(formData); 
-      navigate('/');
+      navigate('/restaurant/dashboard');
       
     } else {
       // Handle restaurant login
