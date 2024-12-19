@@ -8,11 +8,11 @@ DELETE FROM restaurants;
 DELETE FROM customers;
 
 -- Add test restaurants
-INSERT INTO restaurants (id, name, street, postal_code, description, password_hash, balance)
+INSERT INTO restaurants (id, username, name, street, postal_code, description, password_hash, balance)
 VALUES 
-(1, 'Bella Italia', 'Hauptstraße 1', '10115', 'Authentic Italian cuisine in the heart of the city', 'resto1', 0.00),
-(2, 'Burger House', 'Friedrichstraße 2', '10117', 'Gourmet burgers and fresh ingredients', 'resto2', 0.00),
-(3, 'Sushi Master', 'Kantstraße 3', '10623', 'Premium sushi and Japanese specialties', 'resto3', 0.00);
+(1, 'Bella','Bella Italia', 'Hauptstraße 1', '10115', 'Authentic Italian cuisine in the heart of the city', 'resto1', 0.00),
+(2, 'BurgerH', 'Burger House', 'Friedrichstraße 2', '10117', 'Gourmet burgers and fresh ingredients', 'resto2', 0.00),
+(3, 'SushiM', 'Sushi Master', 'Kantstraße 3', '10623', 'Premium sushi and Japanese specialties', 'resto3', 0.00);
 
 -- Add test customers
 INSERT INTO customers (id, username, first_name, last_name, street, postal_code, password_hash, balance)

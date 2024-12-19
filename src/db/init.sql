@@ -1,9 +1,10 @@
 CREATE TABLE IF NOT EXISTS restaurants (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT Null,
   name TEXT NOT NULL,
   street TEXT NOT NULL,
   postal_code TEXT NOT NULL,
-  description TEXT NOT NULL,
+  description TEXT,
   image_url TEXT,
   password_hash TEXT NOT NULL,
   balance DECIMAL(10,2) DEFAULT 0.00
