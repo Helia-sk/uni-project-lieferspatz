@@ -31,7 +31,7 @@ const CustomerLogin = () => {
     console.log(isLogin)
     if (!isLogin){
       registerUserWithData(formData)
-      navigate('/');
+      navigate('/customer/dashboard');
     } 
     else {
       const isLoginSuccessful = await loginWithData(formData)
