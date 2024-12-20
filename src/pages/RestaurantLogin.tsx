@@ -29,18 +29,36 @@ const RestaurantLogin = () => {
   };
 
   const registerRestaurantWithData = async (formData: any) => {
-    console.log("registerRestaurantWithData", formData);
-    // Insert restaurant details into the database
-    await executeQuery(
-      `INSERT INTO restaurants (username, name,street,postal_code, description, password_hash, balance)
-      VALUES (?, ?, ?, ?, ?,?,?)`,
-      [formData.username, formData.name,formData.street, formData.postalCode, formData.description, formData.password, 100  ]
-    );
-
-    const restaurants = await executeQuery('SELECT * FROM restaurants');
-    console.log("Registered restaurant with data:", restaurants);
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          name: formData.name,
+          street: formData.street,
+          postalCode: formData.postalCode,
+          description: formData.description,
+        }),
+      });
+  
+      if (response.ok) {
+        console.log('Registration successful');
+        return true;
+      } else {
+        const errorData = await response.json();
+        console.error('Error during registration:', errorData);
+        alert(errorData.error || 'Registration failed');
+        return false;
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+      alert('Network error during registration');
+      return false;
+    }
   };
-
+  
   const loginWithData = async (formData: any) => {
     // Query database for restaurant credentials
     const restaurantIds = await executeQuery(

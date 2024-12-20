@@ -40,7 +40,7 @@ const Menu = () => {
 
   const loadMenuItems = async () => {
     try {
-      const items = executeQuery('SELECT * FROM menu_items WHERE restaurant_id = ?', [1]);
+      const items = executeQuery('SELECT * FROM menu_items WHERE restaurant_id = ?', [2]);
       setItems(items);
     } catch (error) {
       console.error('Failed to load menu items:', error);
