@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChefHat } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
-import { executeQuery } from '../db';
 
 const RestaurantLogin = () => {
   const navigate = useNavigate();
@@ -11,68 +10,31 @@ const RestaurantLogin = () => {
   const handleSubmit = async (formData: any) => {
     console.log('Restaurant auth:', formData);
 
-    if (!isLogin) {
-      console.log("registration");
-      // Handle restaurant registration
-      await registerRestaurantWithData(formData); 
-      navigate('/restaurant/dashboard');
-      
-    } else {
-      // Handle restaurant login
-      const isLoginSuccessful = await loginWithData(formData);
-      if (isLoginSuccessful) {
-        navigate('/restaurant/dashboard');
-      } else {
-        alert("Invalid username or password. Please try again.");
-      }
-    }
-  };
+    const endpoint = isLogin
+      ? 'http://127.0.0.1:5000/api/login'
+      : 'http://127.0.0.1:5000/api/register';
 
-  const registerRestaurantWithData = async (formData: any) => {
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          name: formData.name,
-          street: formData.street,
-          postalCode: formData.postalCode,
-          description: formData.description,
-        }),
+        body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
-        console.log('Registration successful');
-        return true;
+        const data = await response.json();
+        console.log(`${isLogin ? 'Login' : 'Registration'} successful`, data);
+        navigate('/restaurant/dashboard'); // Redirect on success
       } else {
         const errorData = await response.json();
-        console.error('Error during registration:', errorData);
-        alert(errorData.error || 'Registration failed');
-        return false;
+        console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, errorData);
+        alert(errorData.error || `${isLogin ? 'Login' : 'Registration'} failed`);
       }
     } catch (error) {
       console.error('Network error:', error);
-      alert('Network error during registration');
-      return false;
+      alert('Network error during authentication');
     }
   };
-  
-  const loginWithData = async (formData: any) => {
-    // Query database for restaurant credentials
-    const restaurantIds = await executeQuery(
-      `SELECT id, username FROM restaurants WHERE username = ? AND password_hash = ?`,
-      [formData.username, formData.password]
-    );
-
-    if (restaurantIds.length > 0) {
-      console.log("Login successful for restaurant:", restaurantIds[0]);
-      return true;
-    }
-    return false;
-  };
-
 
   return (
     <div className="max-w-md mx-auto">
