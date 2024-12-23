@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
 from models import db, Restaurant  # Ensure correct imports for models and db
 
@@ -71,6 +71,8 @@ def login():
 
         # Verify password
         if restaurant and bcrypt.check_password_hash(restaurant.password_hash, data['password']):
+            session['username'] = restaurant.username
+            session['restaurant_id'] = restaurant.id
             return jsonify({'message': 'Login successful', 'restaurant_id': restaurant.id}), 200
         else:
             return jsonify({'error': 'Invalid username or password'}), 401
