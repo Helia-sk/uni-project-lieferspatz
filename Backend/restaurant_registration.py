@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
-from models import db, Restaurant  # Ensure correct imports for models and db
+from models import db, Restaurant# Ensure correct imports for models and db
 
 bcrypt = Bcrypt()
 
@@ -44,6 +44,8 @@ def register():
             password_hash=hashed_password,
             balance=100.00  # Default balance
         )
+
+
         db.session.add(new_restaurant)
         db.session.commit()
         print("New restaurant added to the database:", new_restaurant)

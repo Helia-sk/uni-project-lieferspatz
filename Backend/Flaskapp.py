@@ -6,6 +6,7 @@ from models import db
 from restaurant_registration import restaurant_auth_bp
 from session_config import init_session
 
+
 def create_app():
     app = Flask(__name__)
     CORS(app)
