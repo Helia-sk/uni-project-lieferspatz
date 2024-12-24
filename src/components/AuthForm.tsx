@@ -13,15 +13,29 @@ const AuthForm: React.FC<AuthFormProps> = ({
   setIsLogin,
   type,
 }) => {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    name: '',
-    firstName: '',
-    lastName: '',
-    street: '',
-    postalCode: '',
-    description: '',
+  // Initialize dynamic formData state
+  const [formData, setFormData] = useState(() => {
+    if (isLogin) {
+      return { username: '', password: '' }; // Only username and password for login
+    } else if (type === 'restaurant') {
+      return {
+        username: '',
+        password: '',
+        name: '',
+        description: '',
+        street: '',
+        postalCode: '',
+      };
+    } else {
+      return {
+        username: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        street: '',
+        postalCode: '',
+      };
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -11,14 +11,16 @@ const RestaurantLogin = () => {
     console.log('Restaurant auth:', formData);
 
     const endpoint = isLogin
-      ? 'http://127.0.0.1:5000/api/login'
-      : 'http://127.0.0.1:5000/api/register';
+      ? 'http://localhost:5000/api/login'  // Use localhost:5000
+      : 'http://localhost:5000/api/register';  // Ensure consistency
+
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+        credentials: 'include', // Send cookies with the request
       });
 
       if (response.ok) {

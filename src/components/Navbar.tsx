@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Utensils } from 'lucide-react';
 
@@ -11,13 +12,24 @@ const Navbar = () => {
     location.pathname.startsWith('/restaurant/dashboard') ||
     location.pathname.startsWith('/customer/dashboard');
 
-  const handleLogout = () => {
-    // Add any logout logic here, e.g., clearing session tokens or state
-    console.log('User logged out');
-    
-    // Navigate to the main page
-    navigate('/');
-  };
+const handleLogout = async () => {
+  try {
+    const response = await axios.post('/api/logout', {}, { withCredentials: true });
+
+    if (response.status === 200) {
+      console.log('User logged out successfully');
+      navigate('/'); // Use the already initialized navigate
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error during logout:', error.response?.data?.error || error.message);
+    } else {
+      console.error('Error during logout:', (error as Error).message);
+    }
+    alert('Failed to logout. Please try again.');
+  }
+};
+
 
   return (
     <nav className="bg-white shadow-lg">
