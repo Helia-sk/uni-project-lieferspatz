@@ -10,12 +10,7 @@ class ActionLog(db.Model):
     description = db.Column(db.String, nullable=True)  # Additional details
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # When the action occurred
     
-class UserSession(db.Model):
-    __tablename__ = 'user_sessions'  # Unique table name
-    id = db.Column(db.String, primary_key=True)  # Unique Session ID
-    user_id = db.Column(db.Integer, nullable=False)  # Linked User ID
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Session creation time
-    expires_at = db.Column(db.DateTime, nullable=False)  # Expiry time
+
 
 class Restaurant(db.Model):
     __tablename__ = 'restaurants'  # Explicitly match the table name in init.sql
