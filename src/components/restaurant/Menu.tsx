@@ -5,6 +5,7 @@ import type { MenuItem } from '../../db/schema';
 import ImageUpload from '../ImageUpload';
 import { executeQuery } from '../../db';
 
+
 type Category = {
   id: string;
   name: string;
@@ -18,10 +19,12 @@ const defaultCategories: Category[] = [
   { id: 'sides', name: 'Side Dishes' },
 ];
 
+
 const Menu = () => {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [categories, setCategories] = useState<Category[]>(defaultCategories);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -40,10 +43,23 @@ const Menu = () => {
 
   const loadMenuItems = async () => {
     try {
-      const items = executeQuery('SELECT * FROM menu_items WHERE restaurant_id = ?', [2]);
-      setItems(items);
+      const response = await fetch('http://localhost:5000/api/menu/', {
+        method: 'GET',
+        credentials: 'include', // Include cookies for session-based authentication
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error fetching menu items: ${response.statusText}`);
+      }
+  
+      const data: MenuItem[] = await response.json();
+      setItems(data);
     } catch (error) {
       console.error('Failed to load menu items:', error);
+      setError('Failed to load menu items.');
     } finally {
       setLoading(false);
     }
@@ -62,6 +78,7 @@ const Menu = () => {
     setIsModalOpen(true);
   };
 
+  
   const handleEditItem = (item: MenuItem) => {
     setEditingItem(item);
     setNewItemData({
@@ -86,69 +103,75 @@ const Menu = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Validate form data
+    if (!newItemData.name || !newItemData.description || !newItemData.price || !newItemData.category) {
+      setError('Please fill out all required fields.');
+      return;
+    }
+
     const itemData = {
       name: newItemData.name,
       description: newItemData.description,
       price: parseFloat(newItemData.price),
       category: newItemData.category,
-      imageUrl: newItemData.imageUrl,
-      isAvailable: newItemData.isAvailable,
-      restaurantId: 1 // Using restaurant ID 1 for testing
+      image_url: newItemData.imageUrl,
+      is_available: newItemData.isAvailable,
+      // restaurant_id is handled by the backend from the session
     };
 
+    console.log('Submitting item:', itemData);
+
     try {
+      let response;
       if (editingItem) {
-        await executeQuery(`
-          UPDATE menu_items 
-          SET name = ?, description = ?, price = ?, category = ?, image_url = ?, is_available = ?
-          WHERE id = ?
-        `, [
-          itemData.name,
-          itemData.description,
-          itemData.price,
-          itemData.category,
-          itemData.imageUrl,
-          itemData.isAvailable,
-          editingItem.id
-        ]);
+        // Edit existing item
+        response = await fetch(`http://localhost:5000/api/menu/${editingItem.id}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(itemData),
+        });
 
-        setItems(items.map(item => 
-          item.id === editingItem.id 
-            ? { ...item, ...itemData }
-            : item
-        ));
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update item.');
+        }
+
+        const updatedItem: MenuItem = await response.json();
+        setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item));
       } else {
-        const result = executeQuery(`
-          INSERT INTO menu_items (
-            restaurant_id, name, description, price, category, image_url, is_available
-          ) VALUES (?, ?, ?, ?, ?, ?, ?)
-          RETURNING id
-        `, [
-          itemData.restaurantId,
-          itemData.name,
-          itemData.description,
-          itemData.price,
-          itemData.category,
-          itemData.imageUrl,
-          itemData.isAvailable
-        ]);
+        // Add new item
+        response = await fetch('http://localhost:5000/api/menu/', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(itemData),
+        });
 
-        const newItem = {
-          id: result[0].id,
-          ...itemData
-        };
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to add item.');
+        }
 
+        const newItem: MenuItem = await response.json();
         setItems([...items, newItem]);
       }
 
       setIsModalOpen(false);
-    } catch (error) {
+      setError(null);
+    } catch (error: any) {
       console.error('Failed to save item:', error);
+      setError(error.message || 'Failed to save the menu item.');
     }
   };
+
 
   const filteredItems = selectedCategory === 'all'
     ? items

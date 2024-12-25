@@ -6,8 +6,13 @@ from restaurant_reg import register_bp
 from restaurant_login import login_bp
 from logout import logout_bp
 from flask_bcrypt import Bcrypt
-import os
 import logging	
+from menu import menu_bp
+from flask_migrate import Migrate   
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 
 def create_app():
     app = Flask(__name__)
@@ -34,11 +39,13 @@ def create_app():
 
     # 5. Initialize Bcrypt
     bcrypt = Bcrypt(app)
+    Migrate(app, db)
 
     # 6. Register Blueprints
     app.register_blueprint(register_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
+    app.register_blueprint(menu_bp)
 
     # 7. Add utility route (optional)
     @app.route('/routes', methods=['GET'])

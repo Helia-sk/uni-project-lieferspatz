@@ -3,6 +3,7 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+#saving the action logs for restaurant registration
 class ActionLog(db.Model):
     __tablename__ = 'action_logs'
     id = db.Column(db.Integer, primary_key=True)  # Auto-increment ID
@@ -10,7 +11,6 @@ class ActionLog(db.Model):
     description = db.Column(db.String, nullable=True)  # Additional details
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # When the action occurred
     
-
 
 class Restaurant(db.Model):
     __tablename__ = 'restaurants'  # Explicitly match the table name in init.sql
@@ -35,7 +35,8 @@ class MenuItem(db.Model):
     price = db.Column(db.Numeric(10, 2), nullable=False)
     image_url = db.Column(db.String, nullable=True)
     is_available = db.Column(db.Boolean, default=True)
-
+    category = db.Column(db.String, nullable=False)
+    
 class OpeningHour(db.Model):
     __tablename__ = 'opening_hours'
 
