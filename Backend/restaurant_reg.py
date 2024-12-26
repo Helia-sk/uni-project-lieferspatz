@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
 from models import db, Restaurant, ActionLog
 from utils import validate_request
@@ -52,7 +52,11 @@ def register():
         db.session.add(log)
         db.session.commit()
 
-        logging.info(f"New restaurant registered: {new_restaurant.username}")
+        session['username'] = new_restaurant.username
+        session['restaurant_id'] = new_restaurant.id
+        logging.info(f"Session data: {dict(session)}")
+        session_cookie = request.cookies.get('app_session')
+        logging.info(f"Session cookie set: {session_cookie}")
         return jsonify({'message': 'User registered successfully'}), 201
 
     except Exception as e:
