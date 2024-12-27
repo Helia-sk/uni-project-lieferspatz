@@ -4,6 +4,7 @@ from models import db
 from session_config import init_session
 from restaurant_reg import register_bp
 from restaurant_login import login_bp
+from customer_registration import customer_auth_bp
 from logout import logout_bp
 from flask_bcrypt import Bcrypt
 import logging	
@@ -11,6 +12,7 @@ from menu import menu_bp
 from flask_migrate import Migrate   
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 
@@ -50,7 +52,8 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
     app.register_blueprint(menu_bp)
-
+    app.register_blueprint(customer_auth_bp)
+    
     # 7. Add utility route (optional)
     @app.route('/routes', methods=['GET'])
     def list_routes():
