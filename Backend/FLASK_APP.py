@@ -31,8 +31,6 @@ def create_app():
 
     # 4. Configure CORS to allow credentials and specify the correct origin
     CORS(app, supports_credentials=True, origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
         "http://localhost:5000",
         "http://127.0.0.1:5000",
         "http://localhost:5173",
