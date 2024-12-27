@@ -30,10 +30,14 @@ def create_app():
     init_session(app, db)
 
     # 4. Configure CORS to allow credentials and specify the correct origin
+    # CORS(app)
     CORS(app, supports_credentials=True, origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://127.0.0.1:5050",
+        "http://localhost:5050",
         "http://localhost:5173",
+        "localhost:5173",
         "http://127.0.0.1:5173"
     ])  # Adjust origin as needed
 
@@ -66,4 +70,4 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     print("Starting Flask server...")
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='localhost', port=5050)

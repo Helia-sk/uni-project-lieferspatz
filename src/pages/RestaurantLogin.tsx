@@ -11,8 +11,8 @@ const RestaurantLogin = () => {
     console.log('Restaurant auth:', formData);
 
     const endpoint = isLogin
-      ? 'http://localhost:5000/api/login'  // Use localhost:5000
-      : 'http://localhost:5000/api/register';  // Ensure consistency
+      ? 'http://localhost:5050/api/login'  // Use localhost:5000
+      : 'http://localhost:5050/api/register';  // Ensure consistency
 
 
     try {
