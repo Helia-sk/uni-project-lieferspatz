@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChefHat } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
+import apiClient from '../api';
 
 const RestaurantLogin = () => {
   const navigate = useNavigate();
@@ -10,31 +11,19 @@ const RestaurantLogin = () => {
   const handleSubmit = async (formData: any) => {
     console.log('Restaurant auth:', formData);
 
-    const endpoint = isLogin
-      ? 'http://localhost:5000/api/login'  // Use localhost:5000
-      : 'http://localhost:5000/api/register';  // Ensure consistency
+    const endpoint = isLogin ? '/api/login' : '/api/register';
 
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        credentials: 'include', // Send cookies with the request
-      });
+      const response = await apiClient.post(endpoint, formData); // Use Axios for the request
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`${isLogin ? 'Login' : 'Registration'} successful`, data);
+      if (response.status === 200) {
+        console.log(`${isLogin ? 'Login' : 'Registration'} successful`, response.data);
         navigate('/restaurant/dashboard'); // Redirect on success
-      } else {
-        const errorData = await response.json();
-        console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, errorData);
-        alert(errorData.error || `${isLogin ? 'Login' : 'Registration'} failed`);
       }
     } catch (error) {
-      console.error('Network error:', error);
-      alert('Network error during authentication');
+      console.error('Error during authentication:', error);
+      alert('Failed to authenticate. Please try again.');
     }
   };
 

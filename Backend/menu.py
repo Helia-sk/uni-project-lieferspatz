@@ -98,3 +98,92 @@ def add_menu_item():
         db.session.rollback()
         logging.error(f"Unexpected error: {str(e)}")
         return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
+
+
+
+@menu_bp.route('/<int:item_id>', methods=['PUT'])
+def update_menu_item(item_id):
+    restaurant_id = session.get('restaurant_id')
+    if not restaurant_id:
+        logging.warning('Unauthorized access: No restaurant_id in session')
+        return jsonify({'error': 'Unauthorized access'}), 401
+
+    menu_item = MenuItem.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
+    if not menu_item:
+        logging.warning(f"Menu item not found: id={item_id}")
+        return jsonify({'error': 'Menu item not found'}), 404
+
+    data = request.get_json()
+    logging.info(f"Received PUT request to /api/menu/{item_id} with data: {data}")
+
+    # Validate required fields
+    required_fields = ['name', 'description', 'price', 'category']
+    for field in required_fields:
+        if field not in data:
+            logging.warning(f"Missing field: {field}")
+            return jsonify({'error': f"'{field}' is required."}), 400
+
+    try:
+        # Update menu item with new data
+        menu_item.name = data['name']
+        menu_item.description = data['description']
+        menu_item.price = float(data['price'])
+        menu_item.category = data['category']
+        menu_item.image_url = data.get('image_url', menu_item.image_url)
+        menu_item.is_available = bool(data.get('is_available', menu_item.is_available))
+
+        db.session.commit()
+
+        item_data = {
+            'id': menu_item.id,
+            'name': menu_item.name,
+            'description': menu_item.description,
+            'price': float(menu_item.price),
+            'category': menu_item.category,
+            'image_url': menu_item.image_url,
+            'is_available': menu_item.is_available
+        }
+
+        return jsonify(item_data), 200
+
+    except (ValueError, TypeError) as e:
+        logging.error(f"Data validation error: {str(e)}")
+        return jsonify({'error': 'Invalid data format.'}), 400
+    except IntegrityError as e:
+        db.session.rollback()
+        logging.error(f"Database integrity error: {str(e)}")
+        return jsonify({'error': 'Database integrity error.'}), 500
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Unexpected error: {str(e)}")
+        return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
+
+
+
+
+
+@menu_bp.route('/<int:item_id>', methods=['DELETE'])
+def delete_menu_item(item_id):
+    restaurant_id = session.get('restaurant_id')
+    if not restaurant_id:
+        logging.warning('Unauthorized access: No restaurant_id in session')
+        return jsonify({'error': 'Unauthorized access'}), 401
+
+    menu_item = MenuItem.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
+    if not menu_item:
+        logging.warning(f"Menu item not found: id={item_id}")
+        return jsonify({'error': 'Menu item not found'}), 404
+
+    try:
+        db.session.delete(menu_item)
+        db.session.commit()
+        logging.info(f"Deleted menu item: id={item_id}")
+        return jsonify({'message': 'Menu item deleted successfully'}), 200
+    except IntegrityError as e:
+        db.session.rollback()
+        logging.error(f"Database integrity error: {str(e)}")
+        return jsonify({'error': 'Database integrity error.'}), 500
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Unexpected error: {str(e)}")
+        return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500

@@ -3,8 +3,7 @@ import { Dialog } from '@headlessui/react';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import type { MenuItem } from '../../db/schema';
 import ImageUpload from '../ImageUpload';
-import { executeQuery } from '../../db';
-
+import apiClient from '../../api';
 
 type Category = {
   id: string;
@@ -43,19 +42,13 @@ const Menu = () => {
 
   const loadMenuItems = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/menu/', {
-        method: 'GET',
-        credentials: 'include', // Include cookies for session-based authentication
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (!response.ok) {
+      const response = await apiClient.get('/api/menu'); // Use Axios for the request
+
+      if (response.status !== 200) {
         throw new Error(`Error fetching menu items: ${response.statusText}`);
       }
-  
-      const data: MenuItem[] = await response.json();
+
+      const data = response.data;
       setItems(data);
     } catch (error) {
       console.error('Failed to load menu items:', error);
@@ -92,18 +85,25 @@ const Menu = () => {
     setIsModalOpen(true);
   };
 
-  const handleDeleteItem = async (itemId: number) => {
+ const handleDeleteItem = async (itemId: number) => {
     if (!confirm('Are you sure you want to delete this item?')) return;
 
     try {
-      await executeQuery('DELETE FROM menu_items WHERE id = ?', [itemId]);
+      const response = await apiClient.delete(`/api/menu/${itemId}`); // Use Axios for the request
+
+      if (response.status !== 200) {
+        throw new Error(`Failed to delete item: ${response.statusText}`);
+      }
+
       setItems(items.filter(item => item.id !== itemId));
     } catch (error) {
       console.error('Failed to delete item:', error);
+      setError('Failed to delete item.');
     }
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate form data
@@ -128,41 +128,19 @@ const handleSubmit = async (e: React.FormEvent) => {
       let response;
       if (editingItem) {
         // Edit existing item
-        response = await fetch(`http://localhost:5000/api/menu/${editingItem.id}`, {
-          method: 'PUT',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(itemData),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to update item.');
-        }
-
-        const updatedItem: MenuItem = await response.json();
-        setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item));
+        response = await apiClient.put(`/api/menu/${editingItem.id}`, itemData);
       } else {
         // Add new item
-        response = await fetch('http://localhost:5000/api/menu/', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(itemData),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to add item.');
-        }
-
-        const newItem: MenuItem = await response.json();
-        setItems([...items, newItem]);
+        response = await apiClient.post('/api/menu/', itemData);
       }
+
+      if (response.status !== 200 && response.status !== 201) {
+        const errorData = response.data;
+        throw new Error(errorData.error || 'Failed to save item.');
+      }
+
+      const newItem = response.data;
+      setItems(editingItem ? items.map(item => (item.id === newItem.id ? newItem : item)) : [...items, newItem]);
 
       setIsModalOpen(false);
       setError(null);
