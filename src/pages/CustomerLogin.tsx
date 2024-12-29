@@ -2,43 +2,30 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
+import apiClient from '../api';
 
 const CustomerLogin = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
 
-
   const handleSubmit = async (formData: any) => {
     console.log('Customer auth:', formData);
 
-    const endpoint = isLogin
-      ? 'http://localhost:5050/api/customer/login'
-      : 'http://localhost:5050/api/customer/register';
+    const endpoint = isLogin ? '/api/customer/login' : '/api/customer/register';
+    
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`${isLogin ? 'Login' : 'Registration'} successful`, data);
+      const response = await apiClient.post(endpoint, formData);
+      
+      if (response.status === 200 || response.status === 201) {
+        console.log(`${isLogin ? 'Login' : 'Registration'} successful`, response.data);
         navigate('/customer/dashboard'); // Redirect on success
-      } else {
-        const errorData = await response.json();
-        console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, errorData);
-        alert(errorData.error || `${isLogin ? 'Login' : 'Registration'} failed`);
       }
     } catch (error) {
-      console.error('Network error:', error);
-      alert('Network error during authentication');
+      console.error('Error during authentication:', error);
+      alert('Failed to authenticate. Please try again.');
     }
   };
-
-
 
   return (
     <div className="max-w-md mx-auto">
