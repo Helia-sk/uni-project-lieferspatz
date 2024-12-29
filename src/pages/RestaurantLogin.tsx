@@ -12,12 +12,12 @@ const RestaurantLogin = () => {
     console.log('Restaurant auth:', formData);
 
     const endpoint = isLogin ? '/api/login' : '/api/register';
-
+    
 
     try {
-      const response = await apiClient.post(endpoint, formData); // Use Axios for the request
-
-      if (response.status === 200) {
+      const response = await apiClient.post(endpoint, formData);
+      
+      if (response.status === 200 || response.status === 201) {
         console.log(`${isLogin ? 'Login' : 'Registration'} successful`, response.data);
         navigate('/restaurant/dashboard'); // Redirect on success
       }
