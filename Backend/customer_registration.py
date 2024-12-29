@@ -1,6 +1,7 @@
+import logging
 from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
-from models import db, Restaurant, Customer  # Ensure correct imports for models and db
+from models import ActionLog, db, Restaurant, Customer  # Ensure correct imports for models and db
 
 bcrypt = Bcrypt()
 #blueprint for customer
@@ -52,9 +53,20 @@ def register():
             balance=100.00  # Default balance
         )
         db.session.add(new_customer)
+
+        # Log the registration action
+        log = ActionLog(
+            action="registration",
+            description=f"Registered customer: {new_customer.first_name} (username: {new_customer.username})"
+        )
+        db.session.add(log)
         db.session.commit()
         print("New customer added to the database:", new_customer)
 
+
+        session['username'] = new_customer.username
+        session['customer_id'] = new_customer.id
+        logging.info(f"Session data: {dict(session)}")
         return jsonify({'message': 'User registered successfully'}), 201
 
     except Exception as e:
