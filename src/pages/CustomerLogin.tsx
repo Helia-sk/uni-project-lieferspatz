@@ -2,48 +2,42 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
-import { executeQuery } from '../db';
 
 const CustomerLogin = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
 
 
-  const registerUserWithData = async (formData: any)=> {
-    executeQuery(`INSERT INTO customers (username, first_name , last_name, street, postal_code, password_hash, balance)
-      VALUES
-    (?,?,?,?,?,?,?)`, [formData.username, formData.firstName, formData.lastName, formData.street, formData.postalCode, formData.password, 100]);
-
-    const customers = executeQuery('SELECT * FROM customers');
-    console.log("register user with data ", customers);
-  }
-  const loginWithData = async (formData: any)=> {
-    const userIds = executeQuery(`SELECT id, first_name FROM customers WHERE username = ? AND password_hash= ?`, [formData.username,formData.password]);
-    if (userIds.length>0){
-      return true
-    }
-    return false
-  }
-
   const handleSubmit = async (formData: any) => {
-    // TODO: Implement actual authentication
     console.log('Customer auth:', formData);
-    console.log(isLogin)
-    if (!isLogin){
-      registerUserWithData(formData)
-      navigate('/customer/dashboard');
-    } 
-    else {
-      const isLoginSuccessful = await loginWithData(formData)
-      if (isLoginSuccessful){
-        navigate('/customer/dashboard');
+
+    const endpoint = isLogin
+      ? 'http://localhost:5050/api/customer/login'
+      : 'http://localhost:5050/api/customer/register';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`${isLogin ? 'Login' : 'Registration'} successful`, data);
+        navigate('/customer/dashboard'); // Redirect on success
+      } else {
+        const errorData = await response.json();
+        console.error(`${isLogin ? 'Login' : 'Registration'} failed:`, errorData);
+        alert(errorData.error || `${isLogin ? 'Login' : 'Registration'} failed`);
       }
-      else{
-        alert("Please check your username and password")
-      }
+    } catch (error) {
+      console.error('Network error:', error);
+      alert('Network error during authentication');
     }
-    
   };
+
 
 
   return (

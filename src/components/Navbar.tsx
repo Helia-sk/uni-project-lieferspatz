@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Utensils } from 'lucide-react';
+import apiClient from '../api';
 
 const Navbar = () => {
   const location = useLocation();
@@ -14,7 +15,8 @@ const Navbar = () => {
 
 const handleLogout = async () => {
   try {
-    const response = await axios.post('/api/logout', {}, { withCredentials: true });
+    
+    const response = await apiClient.post('/api/logout', {}, { withCredentials: true });
 
     if (response.status === 200) {
       console.log('User logged out successfully');
