@@ -3,6 +3,7 @@ for Windows:
 1-python -m venv venv
 2-venv\Scripts\activate
 3-pip install -r requirements.txt
+5-pip install npm
 4-npm install
 
 

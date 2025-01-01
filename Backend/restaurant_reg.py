@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from flask_bcrypt import Bcrypt
-from models import db, Restaurant, ActionLog
+from models import db, Restaurant, ActionLog, DeliveryArea
 from utils import validate_request
 import logging
 
@@ -43,7 +43,12 @@ def register():
             balance=100.00
         )
         db.session.add(new_restaurant)
+        db.session.commit()
 
+         # Add postal code to delivery areas
+        delivery_area = DeliveryArea(restaurant_id=new_restaurant.id, postal_code=data['postalCode'])
+        db.session.add(delivery_area)
+        
         # Log the registration action
         log = ActionLog(
             action="registration",
