@@ -8,6 +8,7 @@ from customer_registration import customer_auth_bp
 from logout import logout_bp
 from Res_opening_hours import settings_bp
 from Res_delivery_area import delivery_bp
+from Res_Profile import profile_bp
 from flask_bcrypt import Bcrypt
 import logging	
 from menu import menu_bp
@@ -57,6 +58,7 @@ def create_app():
     app.register_blueprint(customer_auth_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(delivery_bp)
+    app.register_blueprint(profile_bp)
     
     # 7. Add utility route (optional)
     @app.route('/routes', methods=['GET'])

@@ -1,14 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import type { Restaurant } from '../../db/schema';
 import ImageUpload from '../ImageUpload';
+import apiClient from '../../api'; 
 
 const Profile = () => {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Fetch restaurant data
+    const fetchRestaurantData = async () => {
+      try {
+        const response = await apiClient.get('/api/restaurant');
+        setRestaurant(response.data);
+      } catch (error) {
+        console.error('Failed to fetch restaurant data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRestaurantData();
     setLoading(false);
   }, []);
 
@@ -20,9 +33,35 @@ const Profile = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    // TODO: Save restaurant data
-    setSaving(false);
+  
+    const updatedData = {
+      id: restaurant?.id ?? 0,
+      name: (document.getElementById('name') as HTMLInputElement).value,
+      description: (document.getElementById('description') as HTMLTextAreaElement).value,
+      street: (document.getElementById('street') as HTMLInputElement).value,
+      postalCode: (document.getElementById('postalCode') as HTMLInputElement).value,
+      imageUrl: restaurant?.imageUrl, // Assume the image URL is already set or uploaded
+      passwordHash: restaurant?.passwordHash ?? '',
+      balance: restaurant?.balance ?? 0,
+    };
+  
+    try {
+      const response = await apiClient.put('/api/restaurant', updatedData);
+      if (response.status === 200) {
+        console.log('Restaurant updated successfully:', response.data);
+        setRestaurant({ ...restaurant, ...updatedData });
+        setError(null);
+      } else {
+        throw new Error('Failed to update restaurant');
+      }
+    } catch (error) {
+      console.error('Failed to update restaurant:', error);
+      setError('Failed to update restaurant');
+    } finally {
+      setSaving(false);
+    }
   };
+  
 
   if (loading) {
     return (
