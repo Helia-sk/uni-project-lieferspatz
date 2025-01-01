@@ -6,6 +6,7 @@ import Menu from '../components/restaurant/Menu';
 import Orders from '../components/restaurant/Orders';
 import OrderHistory from '../components/restaurant/OrderHistory';
 import Settings from '../components/restaurant/Settings';
+import Balance from '../components/restaurant/Balance';
 
 const RestaurantDashboard = () => {
   return (
@@ -18,6 +19,7 @@ const RestaurantDashboard = () => {
           <Route path="/menu" element={<Menu />} />
           <Route path="/history" element={<OrderHistory />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/balance" element={<Balance />} />
         </Routes>
       </div>
     </div>

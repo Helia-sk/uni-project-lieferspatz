@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import apiClient from '../../api'; // Import your API client
-
+import apiClient from '../../api'; 
 type OpeningHour = {
   id: number;
   day_of_week: number;

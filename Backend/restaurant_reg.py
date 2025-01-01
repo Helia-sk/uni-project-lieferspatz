@@ -40,7 +40,7 @@ def register():
             postal_code=data['postalCode'],
             description=data['description'],
             password_hash=hashed_password,
-            balance=100.00
+            balance=0.00
         )
         db.session.add(new_restaurant)
         db.session.commit()
