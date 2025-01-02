@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer } from 'react';
 import type { MenuItem } from '../db/schema';
 
 interface CartItem extends MenuItem {
@@ -31,11 +31,12 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'ADD_ITEM': {
       // Check if item is from the same restaurant
       if (state.restaurantId && state.restaurantId !== action.payload.restaurantId) {
+        // Optionally, show an error or notification here
         return state;
       }
 
       const existingItem = state.items.find(item => item.id === action.payload.id);
-      
+
       if (existingItem) {
         return {
           ...state,
@@ -47,17 +48,21 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         };
       }
 
+      // Set the restaurantId only if it's null
       return {
-        restaurantId: action.payload.restaurantId,
+        restaurantId: state.restaurantId ?? action.payload.restaurantId,
         items: [...state.items, { ...action.payload, quantity: 1 }],
       };
     }
 
     case 'REMOVE_ITEM':
+      const updatedItems = state.items.filter(item => item.id !== action.payload);
+      // Only reset restaurantId if all items from the restaurant are removed
+      const newRestaurantId = updatedItems.length > 0 ? state.restaurantId : null;
       return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload),
-        restaurantId: state.items.length === 1 ? null : state.restaurantId,
+        items: updatedItems,
+        restaurantId: newRestaurantId,
       };
 
     case 'UPDATE_QUANTITY':

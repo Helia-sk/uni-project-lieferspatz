@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Minus, Plus } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
@@ -11,8 +11,10 @@ const Cart: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  console.log('Restaurant ID from cart:', state.restaurantId);
+
   const handleSubmitOrder = async () => {
-    if (!state.items?.length) {
+      if (!state.items?.length) {
       setError('Your cart is empty');
       return;
     }
