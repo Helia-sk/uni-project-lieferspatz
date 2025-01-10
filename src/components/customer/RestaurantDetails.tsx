@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Clock, MapPin, Plus, ShoppingCart, Check } from 'lucide-react';
 import type { Restaurant, MenuItem } from '../../db/schema';
@@ -35,13 +35,18 @@ const RestaurantDetails: React.FC = () => {
     loadData();
   }, [id]);
 
-  const handleAddToCart = (item: MenuItem) => {
-    addToCart(item);
-    setAddedItems(prev => ({ ...prev, [item.id]: true }));
+  const handleAddToCart = (item: MenuItem, restaurantId: number) => {
+    console.log("handle add to cart" + restaurant?.id)
+    item.restaurantId = restaurant?.id as number;
+    addToCart(item); // Add the item to the cart
+    setAddedItems(prev => ({ ...prev, [item.id]: true })); // Mark the item as added
+
+    // Reset the "added" status after 2 seconds
     setTimeout(() => {
       setAddedItems(prev => ({ ...prev, [item.id]: false }));
     }, 2000);
-  };
+};
+
 
   if (loading) {
     return (

@@ -39,7 +39,11 @@ def login():
             session_cookie = request.cookies.get('app_session')
             logging.info(f"Session cookie set: {session_cookie}")
 
-            return jsonify({'message': 'Login successful', 'customer_id': customer.id}), 200
+            return jsonify({
+                'message': 'Login successful',
+                'customer_id': customer.id,
+                'postal_code': customer.postal_code  # Assuming postal_code is a column in the Customer model
+            }), 200
 
         logging.warning("Invalid username or password")
         return jsonify({'error': 'Invalid username or password'}), 401

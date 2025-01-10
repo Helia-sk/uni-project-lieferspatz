@@ -1,8 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, MapPin } from 'lucide-react';
-import type { Restaurant } from '../../db/schema';
-import { getRestaurants } from '../../api/db';
+import apiClient from '../../api';
+
+
+type Restaurant = {
+  id: number;
+  name: string;
+  description: string;
+  street: string;
+  postal_code: string;
+  image_url: string;
+};
 
 const RestaurantList: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -10,26 +19,35 @@ const RestaurantList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadRestaurants = async () => {
-      try {
-        const data = getRestaurants();
-        setRestaurants(data);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to load restaurants:', err);
-        setError('Failed to load restaurants. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRestaurants();
+    loadNearbyRestaurants();
   }, []);
+
+  const loadNearbyRestaurants = async () => {
+
+    try {
+      const response = await apiClient.get('/api/restaurants/nearby', {
+        withCredentials: true, // Include session cookies
+      });
+      console.log("loading restaurants")
+      if (response.status !== 200) {
+        throw new Error(`Error fetching restaurants: ${response.statusText}`);
+      }
+
+      const data = response.data;
+      setRestaurants(data);
+    } catch (error) {
+      console.error('Failed to load restaurants:', error);
+      setError('Failed to load restaurants.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+        <p className="text-gray-500 mt-4">Loading...</p>
       </div>
     );
   }
@@ -44,8 +62,7 @@ const RestaurantList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Available Restaurants</h1>
-      
+      <h1 className="text-2xl font-bold text-gray-900">Nearby Restaurants</h1>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {restaurants.map((restaurant) => (
           <Link
@@ -54,9 +71,9 @@ const RestaurantList: React.FC = () => {
             className="block hover:shadow-lg transition-shadow duration-200"
           >
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              {restaurant.imageUrl ? (
+              {restaurant.image_url ? (
                 <img
-                  src={restaurant.imageUrl}
+                  src={restaurant.image_url}
                   alt={restaurant.name}
                   className="w-full h-48 object-cover"
                 />
@@ -65,22 +82,15 @@ const RestaurantList: React.FC = () => {
                   <span className="text-gray-400">No image available</span>
                 </div>
               )}
-              
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   {restaurant.name}
                 </h3>
-                
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                  {restaurant.description}
-                </p>
-                
+                <p className="mt-1 text-sm text-gray-500">{restaurant.description}</p>
+                <p className="mt-1 text-sm text-gray-500">{restaurant.street}</p>
                 <div className="mt-4 flex items-center text-sm text-gray-500">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  {restaurant.postalCode}
-                  
-                  <Clock className="w-4 h-4 ml-4 mr-1" />
-                  Open Now
+                  <MapPin className="w-4 h-4 mr-1" /> {restaurant.postal_code}
+                  <Clock className="w-4 h-4 ml-4 mr-1" /> Open Now
                 </div>
               </div>
             </div>

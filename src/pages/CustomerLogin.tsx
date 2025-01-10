@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users } from 'lucide-react';
 import AuthForm from '../components/AuthForm';
@@ -12,11 +12,11 @@ const CustomerLogin = () => {
     console.log('Customer auth:', formData);
 
     const endpoint = isLogin ? '/api/customer/login' : '/api/customer/register';
-    
+
 
     try {
       const response = await apiClient.post(endpoint, formData);
-      
+
       if (response.status === 200 || response.status === 201) {
         console.log(`${isLogin ? 'Login' : 'Registration'} successful`, response.data);
         navigate('/customer/dashboard'); // Redirect on success

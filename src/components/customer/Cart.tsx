@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Trash2, Minus, Plus } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import { executeQuery } from '../../db';
+import apiClient from '../../api';
+
+
 
 const Cart: React.FC = () => {
   const { state, removeFromCart, updateQuantity, clearCart, total } = useCart();
@@ -11,108 +14,71 @@ const Cart: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  console.log('Restaurant ID from cart:', state.restaurantId);
+
 
   const handleSubmitOrder = async () => {
-      if (!state.items?.length) {
-      setError('Your cart is empty');
-      return;
+  if (!state.items?.length) {
+    setError('Your cart is empty');
+    return;
+  }
+
+  if (!state.restaurantId) {
+    setError('Invalid restaurant ID');
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    // Calculate fees (15% platform fee)
+    const platformFee = Number((total * 0.15).toFixed(2));
+    const restaurantAmount = Number((total * 0.85).toFixed(2));
+    const customerId = 1; // Example customer ID for testing
+
+    const orderPayload = {
+      customer_id: customerId,
+      restaurant_id: state.restaurantId,
+      items: state.items.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      total: total,
+      platform_fee: platformFee,
+      restaurant_amount: restaurantAmount,
+      notes: notes || '',
+    };
+
+    console.log('Sending order payload:', orderPayload);
+
+    // Make the POST request without an Authorization header
+   const response = await apiClient.post('/api/customer/dashboard/orders', orderPayload, {
+      headers: { 'Content-Type': 'application/json' }, // Ensure the Content-Type header is set
+    });
+
+    console.log('Response from backend:', response.data);
+
+    // Clear cart and redirect to orders page
+    clearCart();
+    navigate('/customer/dashboard/orders');
+  } catch (error) {
+    console.error('Failed to submit order:', error);
+
+    if (error.response) {
+      // Error from the backend
+      setError(error.response.data.error || 'Failed to place order');
+    } else {
+      // Network or other error
+      setError('Failed to submit order');
     }
+  } finally {
+    setLoading(false);
+  }
+};
 
-    if (!state.restaurantId) {
-      setError('Invalid restaurant ID');
-      return;
-    }
 
-    setLoading(true);
-    setError(null);
 
-    try {
-      // Calculate fees (15% platform fee)
-      const platformFee = Number((total * 0.15).toFixed(2));
-      const restaurantAmount = Number((total * 0.85).toFixed(2));
-      const customerId = 1; // Using customer ID 1 for testing
-
-      // Start transaction
-      executeQuery('BEGIN TRANSACTION');
-
-      try {
-        // Create order
-        const orderResult = executeQuery(`
-          INSERT INTO orders (
-            customer_id,
-            restaurant_id,
-            status,
-            total_amount,
-            platform_fee,
-            restaurant_amount,
-            notes,
-            created_at,
-            updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-          RETURNING id
-        `, [
-          customerId,
-          state.restaurantId,
-          'processing',
-          total,
-          platformFee,
-          restaurantAmount,
-          notes || null
-        ]);
-
-        if (!orderResult || !orderResult.length) {
-          throw new Error('Failed to create order');
-        }
-
-        const orderId = orderResult[0].id;
-
-        // Add order items
-        for (const item of state.items) {
-          executeQuery(`
-            INSERT INTO order_items (
-              order_id,
-              menu_item_id,
-              quantity,
-              price_at_order
-            ) VALUES (?, ?, ?, ?)
-          `, [orderId, item.id, item.quantity, item.price]);
-        }
-
-        // Update balances
-        executeQuery(
-          'UPDATE customers SET balance = balance - ? WHERE id = ?',
-          [total, customerId]
-        );
-
-        executeQuery(
-          'UPDATE restaurants SET balance = balance + ? WHERE id = ?',
-          [restaurantAmount, state.restaurantId]
-        );
-
-        executeQuery(
-          'UPDATE platform SET balance = balance + ? WHERE id = 1',
-          [platformFee]
-        );
-
-        // Commit transaction
-        executeQuery('COMMIT');
-
-        // Clear cart and redirect
-        clearCart();
-        navigate('/customer/dashboard/orders');
-      } catch (error) {
-        // Rollback transaction on error
-        executeQuery('ROLLBACK');
-        throw error;
-      }
-    } catch (error) {
-      console.error('Failed to submit order:', error);
-      setError(error instanceof Error ? error.message : 'Failed to submit order');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Check if cart is empty
   if (!state.items?.length) {
@@ -227,7 +193,9 @@ const Cart: React.FC = () => {
             <div className="mt-6">
               <button
                 className="w-full bg-orange-500 text-white py-3 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
-                onClick={handleSubmitOrder}
+                onClick={()=>{console.log('Place Order button clicked');
+                handleSubmitOrder();
+                console.log('After calling handleSubmitOrder');}}
                 disabled={loading || !state.restaurantId}
               >
                 {loading ? 'Processing...' : 'Place Order'}
