@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import type { Order } from '../../db/schema';
-import { executeQuery } from '../../db'; // Assuming executeQuery is your database query function
+import { executeQuery } from '../../db';
+import apiClient from "../../api.ts"; // Assuming executeQuery is your database query function
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -10,24 +11,29 @@ const OrderHistory = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
+      console.log("fetching orders")
       setLoading(true);
       setError(null);
 
       try {
-        const customerId = 1; // Replace with dynamic customer ID if applicable
-        const result = await executeQuery(
-          `SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC`,
-          [customerId]
-        );
+        const response = await apiClient.get('/api/customer/dashboard/orders/', {
+          withCredentials: true, // Include session cookies
+        });
 
-        setOrders(result);
+        if (response.status === 200) {
+          setOrders(response.data); // Assuming setOrders is your state updater
+        } else {
+          throw new Error('Failed to fetch orders');
+        }
       } catch (err) {
         console.error('Error fetching orders:', err);
         setError('Failed to load orders. Please try again later.');
       } finally {
         setLoading(false);
       }
-    };
+};
+
+
 
     fetchOrders();
   }, []);

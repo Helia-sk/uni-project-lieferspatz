@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify,session
 from models import db, Order, OrderItem, Restaurant, Customer, Platform
 from utils import validate_request
 from datetime import datetime
@@ -98,6 +98,55 @@ def notify_restaurant(restaurant_id, order):
     if restaurant:
         logging.info(f"Notification sent to Restaurant ID {restaurant_id} for Order ID {order.id}")
 
+@customer_order_bp.route('/api/customer/dashboard/orders/', methods=['GET'])
+def get_customer_order_history():
+    """
+    Endpoint for the customer to fetch their order history using session data.
+    """
+    # Get customer_id from session
+    customer_id = session.get('customer_id')
+    logging.info(f"Customer ID: {customer_id}")
+    if not customer_id:
+        logging.error("Unauthorized access: No customer_id in session")
+        return jsonify({'error': 'Unauthorized access'}), 401
+
+    try:
+        # Fetch order history
+        order_history = fetch_customer_order_history(customer_id)
+        return jsonify(order_history), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching customer order history: {e}")
+        return jsonify({'error': 'Failed to fetch orders'}), 500
+
+
+
+def fetch_customer_order_history(customer_id):
+    """
+    Helper function to fetch customer order history.
+    """
+    logging.info(f"Fetching customer order history for customer ID {customer_id}")
+    orders = Order.query.filter_by(customer_id=customer_id).order_by(Order.created_at.desc()).all()
+    result = [
+        {
+            'id': order.id,
+            'restaurant_id': order.restaurant_id,
+            'status': order.status,
+            'total_amount': float(order.total_amount),
+            'notes': order.notes,
+            'created_at': order.created_at,
+            'items': [
+                {
+                    'menu_item_id': item.menu_item_id,
+                    'quantity': item.quantity,
+                    'price_at_order': float(item.price_at_order),
+                }
+                for item in order.items
+            ],
+        }
+        for order in orders
+    ]
+    return result
 
 @customer_order_bp.route('/api/restaurant/dashboard/orders', methods=['GET'])
 def get_restaurant_orders():

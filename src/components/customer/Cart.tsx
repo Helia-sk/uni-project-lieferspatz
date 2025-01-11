@@ -58,7 +58,19 @@ const Cart: React.FC = () => {
     });
 
     console.log('Response from backend:', response.data);
+    // Fetch updated order history after placing order
+    const historyResponse = await apiClient.get('/api/customer/dashboard/orders/', {
+      withCredentials: true, // Include session cookies
+    });
 
+    if (historyResponse.status === 200) {
+      console.log('Updated order history:', historyResponse.data);
+
+      // Redirect to OrderHistory page or pass the updated data
+      navigate('/customer/dashboard/orders', {
+        state: { orders: historyResponse.data }, // Pass orders as state
+      });
+    }
     // Clear cart and redirect to orders page
     clearCart();
     navigate('/customer/dashboard/orders');
