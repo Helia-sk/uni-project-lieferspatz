@@ -67,12 +67,19 @@ const RestaurantDetails: React.FC = () => {
   }, [id]);
 
   const handleAddToCart = (item: MenuItem) => {
-    addToCart(item);
+    if (!restaurant) return;
+  
+    addToCart({
+      ...item,
+      restaurantId: restaurant.id,  // Ensure restaurantId is stored
+    });
+  
     setAddedItems(prev => ({ ...prev, [item.id]: true }));
     setTimeout(() => {
       setAddedItems(prev => ({ ...prev, [item.id]: false }));
     }, 2000);
   };
+  
 
   if (loading) {
     return (

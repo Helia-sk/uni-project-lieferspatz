@@ -1,11 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Minus, Plus } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
-import { executeQuery } from '../../db';
 import apiClient from '../../api';
-
-
 
 const Cart: React.FC = () => {
   const { state, removeFromCart, updateQuantity, clearCart, total } = useCart();
@@ -14,83 +11,76 @@ const Cart: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-
+  useEffect(() => {
+    console.log('Loading state:', loading);
+    console.log('Restaurant ID:', state.restaurantId);
+  }, [loading, state.restaurantId]);
 
   const handleSubmitOrder = async () => {
-  if (!state.items?.length) {
-    setError('Your cart is empty');
-    return;
-  }
+    if (!state.items?.length) {
+      setError('Your cart is empty');
+      return;
+    }
 
-  if (!state.restaurantId) {
-    setError('Invalid restaurant ID');
-    return;
-  }
+    if (!state.restaurantId) {
+      setError('Invalid restaurant ID');
+      return;
+    }
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    // Calculate fees (15% platform fee)
-    const platformFee = Number((total * 0.15).toFixed(2));
-    const restaurantAmount = Number((total * 0.85).toFixed(2));
-    const customerId = 1; // Example customer ID for testing
+    try {
+      const orderPayload = {
+        restaurant_id: state.restaurantId,  // Ensure restaurant ID is included
+        items: state.items.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        total: total,
+        notes: notes || '',
+      
+      };
 
-    const orderPayload = {
-      customer_id: customerId,
-      restaurant_id: state.restaurantId,
-      items: state.items.map((item) => ({
-        id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      total: total,
-      platform_fee: platformFee,
-      restaurant_amount: restaurantAmount,
-      notes: notes || '',
-    };
+      console.log('Sending order payload:', orderPayload);
 
-    console.log('Sending order payload:', orderPayload);
-
-    // Make the POST request without an Authorization header
-   const response = await apiClient.post('/api/customer/dashboard/orders', orderPayload, {
-      headers: { 'Content-Type': 'application/json' }, // Ensure the Content-Type header is set
-    });
-
-    console.log('Response from backend:', response.data);
-    // Fetch updated order history after placing order
-    const historyResponse = await apiClient.get('/api/customer/dashboard/orders/', {
-      withCredentials: true, // Include session cookies
-    });
-
-    if (historyResponse.status === 200) {
-      console.log('Updated order history:', historyResponse.data);
-
-      // Redirect to OrderHistory page or pass the updated data
-      navigate('/customer/dashboard/orders', {
-        state: { orders: historyResponse.data }, // Pass orders as state
+      // Make the POST request without an Authorization header
+      const response = await apiClient.post('/api/customer/place_order', orderPayload, {
+        headers: { 'Content-Type': 'application/json' }, // Ensure the Content-Type header is set
       });
+
+      console.log('Response from backend:', response.data);
+      // Fetch updated order history after placing order
+      const historyResponse = await apiClient.get('/api/customer/dashboard/orders/', {
+        withCredentials: true, // Include session cookies
+      });
+
+      if (historyResponse.status === 200) {
+        console.log('Updated order history:', historyResponse.data);
+
+        // Redirect to OrderHistory page or pass the updated data
+        navigate('/customer/dashboard/orders', {
+          state: { orders: historyResponse.data }, // Pass orders as state
+        });
+      }
+      // Clear cart and redirect to orders page
+      clearCart();
+      navigate('/customer/dashboard/orders');
+    } catch (error) {
+      console.error('Failed to submit order:', error);
+
+      if ((error as any).response) {
+        // Error from the backend
+        setError((error as any).response.data.error || 'Failed to place order');
+      } else {
+        // Network or other error
+        setError('Failed to submit order');
+      }
+    } finally {
+      setLoading(false);
     }
-    // Clear cart and redirect to orders page
-    clearCart();
-    navigate('/customer/dashboard/orders');
-  } catch (error) {
-    console.error('Failed to submit order:', error);
-
-    if (error.response) {
-      // Error from the backend
-      setError(error.response.data.error || 'Failed to place order');
-    } else {
-      // Network or other error
-      setError('Failed to submit order');
-    }
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  };
 
   // Check if cart is empty
   if (!state.items?.length) {
@@ -205,9 +195,11 @@ const Cart: React.FC = () => {
             <div className="mt-6">
               <button
                 className="w-full bg-orange-500 text-white py-3 px-4 rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
-                onClick={()=>{console.log('Place Order button clicked');
-                handleSubmitOrder();
-                console.log('After calling handleSubmitOrder');}}
+                onClick={() => {
+                  console.log('Place Order button clicked');
+                  handleSubmitOrder();
+                  console.log('After calling handleSubmitOrder');
+                }}
                 disabled={loading || !state.restaurantId}
               >
                 {loading ? 'Processing...' : 'Place Order'}

@@ -21,7 +21,7 @@ const Orders = () => {
     const fetchOrders = async () => {
       try {
         const response = await apiClient.get('/api/orders');
-        const fetchedOrders = response.data;
+        const fetchedOrders: Order[] = response.data as Order[];
 
         // Check for new orders
         if (orders.length > 0) {
@@ -29,11 +29,10 @@ const Orders = () => {
             (order: Order) => !orders.some((existingOrder) => existingOrder.id === order.id)
           );
 
-          // Uncomment the code below to enable new order notifications
-           if (newOrders.length > 0) {
-             setNotification(`You have ${newOrders.length} new order(s)!`);
-             setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
-           }
+          if (newOrders.length > 0) {
+            setNotification(`You have ${newOrders.length} new order(s)!`);
+            setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
+          }
         }
 
         setOrders(fetchedOrders);
@@ -46,21 +45,16 @@ const Orders = () => {
       }
     };
 
-    // Initial fetch
+    // Initial fetch (Removed polling)
     fetchOrders();
-
-    // Uncomment the code below to enable polling
-     const intervalId = setInterval(fetchOrders, 5000); // Poll every 5 seconds
-
-    // Cleanup polling interval on component unmount
-     return () => clearInterval(intervalId);
-  }, []); // Empty dependency array to run only once on mount
+    
+  }, []); // ✅ Runs **only once** when the component mounts
 
   const handleAcceptOrder = async (orderId: number) => {
     try {
       const response = await apiClient.post(`/api/orders/${orderId}/accept`, {}, {
         headers: {
-          'Content-Type': 'application/json', // Explicitly set Content-Type
+          'Content-Type': 'application/json',
         },
       });
       if (response.status === 200) {
@@ -82,7 +76,7 @@ const Orders = () => {
     try {
       const response = await apiClient.post(`/api/orders/${orderId}/reject`, {}, {
         headers: {
-          'Content-Type': 'application/json', // Explicitly set Content-Type
+          'Content-Type': 'application/json',
         },
       });
       if (response.status === 200) {
@@ -123,18 +117,19 @@ const Orders = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Active Orders</h1>
 
-            {/* Notification */}
-            {notification && (
+      {/* Notification */}
+      {notification && (
         <div className="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50">
           {notification}
         </div>
       )}
+
       {processingOrders.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
           <Bell className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No orders</h3>
           <p className="mt-1 text-sm text-gray-500">
-            New orders will appear here automatically
+            New orders will appear here when available
           </p>
         </div>
       ) : (

@@ -19,7 +19,7 @@ def get_balance():
             db.func.sum(Order.total_amount - Order.platform_fee)
         ).filter(
             Order.restaurant_id == restaurant_id,
-            Order.status == 'preparing'
+            Order.status.in_(['preparing', 'completed'])
         ).scalar()
 
         # Ensure balance is 0 if no orders are found

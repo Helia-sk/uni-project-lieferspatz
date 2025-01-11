@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
-import type { Order } from '../../db/schema';
-import { executeQuery } from '../../db';
-import apiClient from "../../api.ts"; // Assuming executeQuery is your database query function
+import apiClient from "../../api.ts"; // Assuming this is your API client
+
+interface Order {
+  id: number;
+  status: 'processing' | 'preparing' | 'completed' | 'cancelled';
+  total_amount: number;
+  createdAt: string;
+  notes?: string;
+}
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -11,7 +17,7 @@ const OrderHistory = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      console.log("fetching orders")
+      console.log("Fetching orders...");
       setLoading(true);
       setError(null);
 
@@ -21,7 +27,7 @@ const OrderHistory = () => {
         });
 
         if (response.status === 200) {
-          setOrders(response.data); // Assuming setOrders is your state updater
+          setOrders(response.data as Order[]); // Ensure correct typing
         } else {
           throw new Error('Failed to fetch orders');
         }
@@ -31,9 +37,7 @@ const OrderHistory = () => {
       } finally {
         setLoading(false);
       }
-};
-
-
+    };
 
     fetchOrders();
   }, []);
@@ -54,18 +58,21 @@ const OrderHistory = () => {
     );
   }
 
+  // Active Orders (Processing & Preparing)
   const activeOrders = orders.filter(
     (order) => order.status === 'processing' || order.status === 'preparing'
   );
 
-  const pastOrders = orders.filter(
-    (order) => order.status === 'completed' || order.status === 'cancelled'
-  );
+  // Past Orders (Completed first, Cancelled last)
+  const pastOrders = orders
+    .filter((order) => order.status === 'completed' || order.status === 'cancelled')
+    .sort((a, b) => (a.status === 'cancelled' ? 1 : -1)); // Move 'cancelled' orders to the end
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Your Orders</h1>
 
+      {/* Active Orders Section */}
       {activeOrders.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900">Active Orders</h2>
@@ -75,6 +82,7 @@ const OrderHistory = () => {
         </div>
       )}
 
+      {/* Past Orders Section */}
       {pastOrders.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-900">Past Orders</h2>
@@ -84,6 +92,7 @@ const OrderHistory = () => {
         </div>
       )}
 
+      {/* No Orders */}
       {orders.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
           <p className="text-gray-500">No orders yet</p>
@@ -116,7 +125,7 @@ const OrderCard = ({ order }: { order: Order }) => {
 
         <div className="mt-4 flex items-center text-sm text-gray-500">
           <Clock className="w-4 h-4 mr-1" />
-          {new Date(order.created_at).toLocaleString()}
+          {new Date(order.createdAt).toLocaleString()}
         </div>
 
         <div className="mt-4">

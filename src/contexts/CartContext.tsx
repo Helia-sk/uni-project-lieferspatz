@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 import type { MenuItem } from '../db/schema';
 
 interface CartItem extends MenuItem {
@@ -16,6 +16,17 @@ type CartAction =
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'CLEAR_CART' };
 
+const CART_STORAGE_KEY = 'cartState';
+
+const loadCartFromStorage = (): CartState => {
+  const storedCart = localStorage.getItem(CART_STORAGE_KEY);
+  return storedCart ? JSON.parse(storedCart) : { items: [], restaurantId: null };
+};
+
+const saveCartToStorage = (cart: CartState) => {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+};
+
 const CartContext = createContext<{
   state: CartState;
   dispatch: React.Dispatch<CartAction>;
@@ -27,18 +38,18 @@ const CartContext = createContext<{
 } | null>(null);
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
+  let newState;
+  
   switch (action.type) {
     case 'ADD_ITEM': {
-      // Check if item is from the same restaurant
       if (state.restaurantId && state.restaurantId !== action.payload.restaurantId) {
-        // Optionally, show an error or notification here
         return state;
       }
 
       const existingItem = state.items.find(item => item.id === action.payload.id);
 
       if (existingItem) {
-        return {
+        newState = {
           ...state,
           items: state.items.map(item =>
             item.id === action.payload.id
@@ -46,27 +57,25 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
               : item
           ),
         };
+      } else {
+        newState = {
+          restaurantId: state.restaurantId ?? action.payload.restaurantId,
+          items: [...state.items, { ...action.payload, quantity: 1 }],
+        };
       }
-
-      // Set the restaurantId only if it's null
-      return {
-        restaurantId: state.restaurantId ?? action.payload.restaurantId,
-        items: [...state.items, { ...action.payload, quantity: 1 }],
-      };
+      break;
     }
 
     case 'REMOVE_ITEM':
-      const updatedItems = state.items.filter(item => item.id !== action.payload);
-      // Only reset restaurantId if all items from the restaurant are removed
-      const newRestaurantId = updatedItems.length > 0 ? state.restaurantId : null;
-      return {
+      newState = {
         ...state,
-        items: updatedItems,
-        restaurantId: newRestaurantId,
+        items: state.items.filter(item => item.id !== action.payload),
+        restaurantId: state.items.length > 1 ? state.restaurantId : null,
       };
+      break;
 
     case 'UPDATE_QUANTITY':
-      return {
+      newState = {
         ...state,
         items: state.items.map(item =>
           item.id === action.payload.id
@@ -74,23 +83,26 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
             : item
         ),
       };
+      break;
 
     case 'CLEAR_CART':
-      return {
-        items: [],
-        restaurantId: null,
-      };
+      newState = { items: [], restaurantId: null };
+      break;
 
     default:
-      return state;
+      newState = state;
   }
+
+  saveCartToStorage(newState);  // Save updated state to localStorage
+  return newState;
 };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, {
-    items: [],
-    restaurantId: null,
-  });
+  const [state, dispatch] = useReducer(cartReducer, loadCartFromStorage());
+
+  useEffect(() => {
+    saveCartToStorage(state);
+  }, [state]);
 
   const addToCart = (item: MenuItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
@@ -108,10 +120,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'CLEAR_CART' });
   };
 
-  const total = state.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <CartContext.Provider

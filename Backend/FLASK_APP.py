@@ -1,14 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from customer_show_menu import customer_menu_bp
-from customer_order import customer_order_bp
+from customer_place_order import customer_place_order_bp
 from models import db
 from session_config import init_session
 from restaurant_reg import register_bp
 from restaurant_login import login_bp
 from customer_login import customer_login_bp
 from customer_reg import customer_register_bp
-from customer_place_order import customer_place_order_bp
 from restaurant_details import restaurant_details_bp 
 from nearby_restaurants import nearby_restaurants_bp
 from logout import logout_bp
@@ -71,7 +70,6 @@ def create_app():
     app.register_blueprint(orders_bp)
     app.register_blueprint(customer_login_bp)
     app.register_blueprint(customer_register_bp)
-    app.register_blueprint(customer_order_bp)
     app.register_blueprint(nearby_restaurants_bp)
     app.register_blueprint(customer_menu_bp)
     app.register_blueprint(customer_place_order_bp)
