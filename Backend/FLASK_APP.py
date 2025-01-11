@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
 from customer_order import customer_order_bp
 from models import db
 from session_config import init_session
@@ -62,7 +61,6 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
     app.register_blueprint(menu_bp)
-    app.register_blueprint(customer_auth_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(delivery_bp)
     app.register_blueprint(profile_bp)
