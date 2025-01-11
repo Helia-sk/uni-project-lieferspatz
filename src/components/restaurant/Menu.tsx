@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import type { MenuItem } from '../../db/schema';

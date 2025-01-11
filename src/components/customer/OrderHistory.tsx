@@ -1,14 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import type { Order } from '../../db/schema';
+import { executeQuery } from '../../db'; // Assuming executeQuery is your database query function
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Fetch orders
-    setLoading(false);
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const customerId = 1; // Replace with dynamic customer ID if applicable
+        const result = await executeQuery(
+          `SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC`,
+          [customerId]
+        );
+
+        setOrders(result);
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+        setError('Failed to load orders. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
   if (loading) {
@@ -19,10 +40,18 @@ const OrderHistory = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
   const activeOrders = orders.filter(
     (order) => order.status === 'processing' || order.status === 'preparing'
   );
-  
+
   const pastOrders = orders.filter(
     (order) => order.status === 'completed' || order.status === 'cancelled'
   );
@@ -81,12 +110,12 @@ const OrderCard = ({ order }: { order: Order }) => {
 
         <div className="mt-4 flex items-center text-sm text-gray-500">
           <Clock className="w-4 h-4 mr-1" />
-          {new Date(order.createdAt).toLocaleString()}
+          {new Date(order.created_at).toLocaleString()}
         </div>
 
         <div className="mt-4">
           <p className="text-sm font-medium text-gray-900">
-            Total: €{order.totalAmount.toFixed(2)}
+            Total: €{order.total_amount.toFixed(2)}
           </p>
         </div>
 
