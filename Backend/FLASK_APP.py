@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
+from customer_show_menu import customer_menu_bp
 from customer_order import customer_order_bp
 from models import db
 from session_config import init_session
@@ -61,6 +61,7 @@ def create_app():
     app.register_blueprint(customer_register_bp)
     app.register_blueprint(customer_order_bp)
     app.register_blueprint(nearby_restaurants_bp)
+    app.register_blueprint(customer_menu_bp)
 
     # 7. Add utility route (optional)
     @app.route('/routes', methods=['GET'])
