@@ -10,6 +10,11 @@ from customer_login import customer_login_bp
 from customer_reg import customer_register_bp
 from nearby_restaurants import nearby_restaurants_bp
 from logout import logout_bp
+from Res_opening_hours import settings_bp
+from Res_delivery_area import delivery_bp
+from Res_Profile import profile_bp
+from Res_balance import balance_bp
+from Res_orders import orders_bp
 from flask_bcrypt import Bcrypt
 import logging	
 from menu import menu_bp
@@ -57,6 +62,12 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
     app.register_blueprint(menu_bp)
+    app.register_blueprint(customer_auth_bp)
+    app.register_blueprint(settings_bp)
+    app.register_blueprint(delivery_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(balance_bp)
+    app.register_blueprint(orders_bp)
     app.register_blueprint(customer_login_bp)
     app.register_blueprint(customer_register_bp)
     app.register_blueprint(customer_order_bp)
