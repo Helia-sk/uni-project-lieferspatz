@@ -14,6 +14,7 @@ def get_menu_items():
         return jsonify({'error': 'Unauthorized access'}), 401
 
     restaurant = Restaurant.query.get(restaurant_id)
+    logging.info("restaurant id:" + str(restaurant_id))
     if not restaurant:
         return jsonify({'error': 'Restaurant not found'}), 404
 
