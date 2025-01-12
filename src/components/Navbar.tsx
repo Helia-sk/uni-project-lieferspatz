@@ -3,10 +3,12 @@ import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Utensils } from 'lucide-react';
 import apiClient from '../api';
+import { useCart } from '../contexts/CartContext';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { clearCart } = useCart();
 
   // Check if the current pathname starts with the dashboard paths
   const isDashboard =
@@ -15,6 +17,8 @@ const Navbar = () => {
 
 const handleLogout = async () => {
   try {
+    // Clear the cart before logging out
+    clearCart();
     
     const response = await apiClient.post('/api/logout', {}, { withCredentials: true });
 
