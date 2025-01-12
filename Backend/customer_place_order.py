@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, session
 from models import db, Order, OrderItem, Customer, Platform
 from decimal import Decimal
 import logging
+from flask_socketio import emit
+from socketio_instance import socketio  # Import socketio instance
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -74,8 +76,6 @@ def place_order():
         platform_fee = (total * Decimal('0.15')).quantize(Decimal('0.01'))
         restaurant_amount = (total * Decimal('0.85')).quantize(Decimal('0.01'))
 
-
-
         # Check if customer has enough balance
         if customer.balance < total:
             return jsonify({'error': 'Insufficient balance'}), 400
@@ -115,11 +115,18 @@ def place_order():
 
         db.session.commit()
 
+        # Emit a WebSocket event to notify the restaurant
+        socketio.emit('new_order', {
+            'order_id': order.id,
+            'restaurant_id': data['restaurant_id'],
+            'total_amount': float(total),
+            'status': 'processing'
+        })
+        logging.info(f"Emitted WebSocket event for new order: {order.id}")
+
         return jsonify({'message': 'Order placed successfully', 'order_id': order.id}), 201
 
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error placing order: {e}")
         return jsonify({'error': 'Failed to place order'}), 500
-    
-    

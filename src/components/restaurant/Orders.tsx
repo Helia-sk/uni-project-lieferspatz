@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import apiClient from '../../api';
+import useSocket from '../../hooks/useSocket';
 
 interface Order {
   id: number;
@@ -17,37 +18,42 @@ const Orders = () => {
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await apiClient.get('/api/orders');
-        const fetchedOrders: Order[] = response.data as Order[];
+  useSocket((data) => {
+    setNotification('You have a new order!');
+    setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
+    fetchOrders(); // Fetch orders again to update the list
+  });
 
-        // Check for new orders
-        if (orders.length > 0) {
-          const newOrders = fetchedOrders.filter(
-            (order: Order) => !orders.some((existingOrder) => existingOrder.id === order.id)
-          );
+  const fetchOrders = async () => {
+    try {
+      const response = await apiClient.get('/api/orders');
+      const fetchedOrders: Order[] = response.data as Order[];
 
-          if (newOrders.length > 0) {
-            setNotification(`You have ${newOrders.length} new order(s)!`);
-            setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
-          }
+      // Check for new orders
+      if (orders.length > 0) {
+        const newOrders = fetchedOrders.filter(
+          (order: Order) => !orders.some((existingOrder) => existingOrder.id === order.id)
+        );
+
+        if (newOrders.length > 0) {
+          setNotification(`You have ${newOrders.length} new order(s)!`);
+          setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
         }
-
-        setOrders(fetchedOrders);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setError((error as any).message || 'An unexpected error occurred.');
-      } finally {
-        setLoading(false);
       }
-    };
 
+      setOrders(fetchedOrders);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setError((error as any).message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     // Initial fetch (Removed polling)
     fetchOrders();
-    
   }, []); // ✅ Runs **only once** when the component mounts
 
   const handleAcceptOrder = async (orderId: number) => {

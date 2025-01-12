@@ -1,5 +1,11 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
+import logging
+import sys
+import os
+
 from customer_show_menu import customer_menu_bp
 from customer_place_order import customer_place_order_bp
 from models import db
@@ -8,7 +14,7 @@ from restaurant_reg import register_bp
 from restaurant_login import login_bp
 from customer_login import customer_login_bp
 from customer_reg import customer_register_bp
-from restaurant_details import restaurant_details_bp 
+from restaurant_details import restaurant_details_bp
 from nearby_restaurants import nearby_restaurants_bp
 from logout import logout_bp
 from Res_opening_hours import settings_bp
@@ -16,16 +22,10 @@ from Res_delivery_area import delivery_bp
 from Res_Profile import profile_bp
 from Res_balance import balance_bp
 from Res_orders import orders_bp
-from flask_bcrypt import Bcrypt
-import logging	
 from menu import menu_bp
-from flask_migrate import Migrate   
-import sys
-import os
-
+from socketio_instance import socketio  # Import socketio instance
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
 
 def create_app():
     app = Flask(__name__)
@@ -43,7 +43,6 @@ def create_app():
     init_session(app, db)
 
     # 4. Configure CORS to allow credentials and specify the correct origin
-    # CORS(app)
     CORS(app, supports_credentials=True, origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -54,11 +53,14 @@ def create_app():
         "http://127.0.0.1:5173"
     ])  # Adjust origin as needed
 
-    # 5. Initialize Bcrypt
+    # 5. Initialize WebSockets
+    socketio.init_app(app)  # Initialize SocketIO with the app
+
+    # 6. Initialize Bcrypt
     bcrypt = Bcrypt(app)
     Migrate(app, db)
 
-    # 6. Register Blueprints
+    # 7. Register Blueprints
     app.register_blueprint(register_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
@@ -73,16 +75,24 @@ def create_app():
     app.register_blueprint(nearby_restaurants_bp)
     app.register_blueprint(customer_menu_bp)
     app.register_blueprint(customer_place_order_bp)
-    app.register_blueprint(restaurant_details_bp) 
+    app.register_blueprint(restaurant_details_bp)
 
+    # 8. Add WebSocket event handlers
+    @socketio.on('connect')
+    def handle_connect():
+        logging.info("A client connected via WebSocket")
 
-    # 7. Add utility route (optional)
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        logging.info("A client disconnected from WebSocket")
+
+    # 9. Utility route to list all available routes
     @app.route('/routes', methods=['GET'])
     def list_routes():
         routes = {rule.rule: list(rule.methods) for rule in app.url_map.iter_rules()}
         return jsonify(routes)
-    
-     # 8. Log all incoming requests for debugging
+
+    # 10. Log all incoming requests for debugging
     @app.before_request
     def log_request_info():
         logging.info(f"Received {request.method} request to {request.url}")
@@ -90,9 +100,9 @@ def create_app():
         if request.method in ["POST", "PUT", "PATCH"]:
             logging.info(f"Body: {request.get_json()}")
 
-    return app
+    return app, socketio  # Return `socketio` along with `app`
 
 if __name__ == "__main__":
-    app = create_app()
+    app, socketio = create_app()
     print("Starting Flask server...")
-    app.run(debug=True, host='localhost', port=5050)
+    socketio.run(app, debug=True, host='localhost', port=5050)  # Use socketio.run instead of app.run
