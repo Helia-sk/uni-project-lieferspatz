@@ -6,6 +6,10 @@ for Windows:
 5-pip install npm
 4-npm install
 
+for websocket:
+install requirements.txt agaon or only insatll flask_socketio
+in terminal:npm install socket.io-client in terminal
+
 
 command to clean sessions 
 PS .... Backend> sqlite3 database.db
