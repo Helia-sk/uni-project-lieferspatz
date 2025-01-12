@@ -5,24 +5,26 @@ from flask_migrate import Migrate
 import logging
 import sys
 import os
-
-from restaurant_details import restaurant_details_bp  # Import the combined blueprint
-from customer_place_order import customer_place_order_bp
 from models import db
 from session_config import init_session
-from restaurant_reg import register_bp
-from restaurant_login import login_bp
+from socketio_instance import socketio
+from logout import logout_bp
+#Customer blueprints
+from customer_restaurant_details import restaurant_details_bp
+from customer_place_order import customer_place_order_bp
 from customer_login import customer_login_bp
 from customer_reg import customer_register_bp
 from nearby_restaurants import nearby_restaurants_bp
-from logout import logout_bp
+#restaurabnt blueprints
+from restaurant_reg import register_bp
+from restaurant_login import login_bp
 from Res_opening_hours import settings_bp
 from Res_delivery_area import delivery_bp
 from Res_Profile import profile_bp
 from Res_balance import balance_bp
 from Res_orders import orders_bp
 from menu import menu_bp
-from socketio_instance import socketio
+
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -72,7 +74,7 @@ def create_app():
     app.register_blueprint(customer_login_bp)
     app.register_blueprint(customer_register_bp)
     app.register_blueprint(nearby_restaurants_bp)
-    app.register_blueprint(restaurant_details_bp)  # Register the combined blueprint
+    app.register_blueprint(restaurant_details_bp)  
     app.register_blueprint(customer_place_order_bp)
 
     # 8. Add WebSocket event handlers
