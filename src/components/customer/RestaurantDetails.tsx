@@ -4,14 +4,23 @@ import { Clock, MapPin, ShoppingCart, Check } from 'lucide-react';
 import apiClient from '../../api';
 import { useCart } from '../../contexts/CartContext';
 
-interface Restaurant {
+type OpeningHour = {
+  day_of_week: number;
+  open_time: string;
+  close_time: string;
+};
+
+type Restaurant = {
   id: number;
   name: string;
-  street: string;
-  postalCode: string;
   description: string;
-  imageUrl: string;
-}
+  street: string;
+  postal_code: string;
+  image_url: string;
+  is_open: boolean;
+  opening_hours: OpeningHour[];
+};
+
 
 interface MenuItem {
   id: number;
@@ -21,15 +30,13 @@ interface MenuItem {
   category: string;
   imageUrl: string;
   isAvailable: boolean;
-  restaurantId: number;  // Add this missing property
+  restaurantId: number;
 }
-
 
 const getRestaurantById = async (id: number): Promise<Restaurant> => {
   const response = await apiClient.get<Restaurant>(`/api/restaurant_details/${id}`);
   return response.data;
 };
-
 
 const getMenuItems = async (restaurantId: number): Promise<MenuItem[]> => {
   const response = await apiClient.get<MenuItem[]>(`/api/restaurant_details/${restaurantId}/menu`);
@@ -79,7 +86,6 @@ const RestaurantDetails: React.FC = () => {
       setAddedItems(prev => ({ ...prev, [item.id]: false }));
     }, 2000);
   };
-  
 
   if (loading) {
     return (
@@ -97,15 +103,14 @@ const RestaurantDetails: React.FC = () => {
     );
   }
 
- // Group menu items dynamically based on category
-const categorizedMenuItems = menuItems.reduce((acc, item) => {
-  if (!acc[item.category]) {
-    acc[item.category] = [];
-  }
-  acc[item.category].push(item);
-  return acc;
-}, {} as Record<string, MenuItem[]>);
-
+  // Group menu items dynamically based on category
+  const categorizedMenuItems = menuItems.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, MenuItem[]>);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -119,11 +124,11 @@ const categorizedMenuItems = menuItems.reduce((acc, item) => {
             <div className="mt-4 flex items-center space-x-4 text-sm">
               <div className="flex items-center">
                 <MapPin className="w-4 h-4 mr-1" />
-                {restaurant.street}, {restaurant.postalCode}
+                {restaurant.street}, {restaurant.postal_code}
               </div>
               <div className="flex items-center">
                 <Clock className="w-4 h-4 mr-1" />
-                Open Now
+                {restaurant.is_open ? 'Open Now' : 'Closed'}
               </div>
             </div>
           </div>
@@ -132,7 +137,7 @@ const categorizedMenuItems = menuItems.reduce((acc, item) => {
 
       {/* Menu Categories */}
       <div className="grid grid-cols-1 gap-6">
-      {Object.entries(categorizedMenuItems).map(([category, items]) => items.length > 0 && (
+        {Object.entries(categorizedMenuItems).map(([category, items]) => items.length > 0 && (
           <div key={category} className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">{category}</h2>
             <div className="space-y-4">

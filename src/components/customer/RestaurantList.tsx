@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { Clock, MapPin } from 'lucide-react';
 import apiClient from '../../api';
 
+type OpeningHour = {
+  day_of_week: number;
+  open_time: string;
+  close_time: string;
+};
 
 type Restaurant = {
   id: number;
@@ -11,6 +16,8 @@ type Restaurant = {
   street: string;
   postal_code: string;
   image_url: string;
+  is_open: boolean;
+  opening_hours: OpeningHour[];
 };
 
 const RestaurantList: React.FC = () => {
@@ -23,9 +30,8 @@ const RestaurantList: React.FC = () => {
   }, []);
 
   const loadNearbyRestaurants = async () => {
-
     try {
-      const response = await apiClient.get('/api/restaurants/nearby', {
+      const response = await apiClient.get<Restaurant[]>('/api/restaurant_details/nearby', {
         withCredentials: true, // Include session cookies
       });
       console.log("loading restaurants")
@@ -33,7 +39,7 @@ const RestaurantList: React.FC = () => {
         throw new Error(`Error fetching restaurants: ${response.statusText}`);
       }
 
-      const data = response.data;
+      const data: Restaurant[] = response.data;
       setRestaurants(data);
     } catch (error) {
       console.error('Failed to load restaurants:', error);
@@ -90,7 +96,8 @@ const RestaurantList: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500">{restaurant.street}</p>
                 <div className="mt-4 flex items-center text-sm text-gray-500">
                   <MapPin className="w-4 h-4 mr-1" /> {restaurant.postal_code}
-                  <Clock className="w-4 h-4 ml-4 mr-1" /> Open Now
+                  <Clock className="w-4 h-4 ml-4 mr-1" />
+                  {restaurant.is_open ? 'Open Now' : 'Closed'}
                 </div>
               </div>
             </div>

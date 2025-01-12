@@ -6,7 +6,7 @@ import logging
 import sys
 import os
 
-from customer_show_menu import customer_menu_bp
+from restaurant_details import restaurant_details_bp  # Import the combined blueprint
 from customer_place_order import customer_place_order_bp
 from models import db
 from session_config import init_session
@@ -14,7 +14,6 @@ from restaurant_reg import register_bp
 from restaurant_login import login_bp
 from customer_login import customer_login_bp
 from customer_reg import customer_register_bp
-from restaurant_details import restaurant_details_bp
 from nearby_restaurants import nearby_restaurants_bp
 from logout import logout_bp
 from Res_opening_hours import settings_bp
@@ -23,7 +22,7 @@ from Res_Profile import profile_bp
 from Res_balance import balance_bp
 from Res_orders import orders_bp
 from menu import menu_bp
-from socketio_instance import socketio  # Import socketio instance
+from socketio_instance import socketio
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -34,7 +33,7 @@ def create_app():
     basedir = os.path.abspath(os.path.dirname(__file__))
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'database.db')}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.secret_key = 'Hi'  # Use a fixed secret key for development
+    app.secret_key = 'Hi'
 
     # 2. Initialize the database
     db.init_app(app)
@@ -51,10 +50,10 @@ def create_app():
         "http://localhost:5173",
         "localhost:5173",
         "http://127.0.0.1:5173"
-    ])  # Adjust origin as needed
+    ])
 
     # 5. Initialize WebSockets
-    socketio.init_app(app)  # Initialize SocketIO with the app
+    socketio.init_app(app)
 
     # 6. Initialize Bcrypt
     bcrypt = Bcrypt(app)
@@ -73,9 +72,8 @@ def create_app():
     app.register_blueprint(customer_login_bp)
     app.register_blueprint(customer_register_bp)
     app.register_blueprint(nearby_restaurants_bp)
-    app.register_blueprint(customer_menu_bp)
+    app.register_blueprint(restaurant_details_bp)  # Register the combined blueprint
     app.register_blueprint(customer_place_order_bp)
-    app.register_blueprint(restaurant_details_bp)
 
     # 8. Add WebSocket event handlers
     @socketio.on('connect')
@@ -100,9 +98,9 @@ def create_app():
         if request.method in ["POST", "PUT", "PATCH"]:
             logging.info(f"Body: {request.get_json()}")
 
-    return app, socketio  # Return `socketio` along with `app`
+    return app, socketio
 
 if __name__ == "__main__":
     app, socketio = create_app()
     print("Starting Flask server...")
-    socketio.run(app, debug=True, host='localhost', port=5050)  # Use socketio.run instead of app.run
+    socketio.run(app, debug=True, host='localhost', port=5050)
