@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify, session
 from models import Restaurant
-
-from flask import Blueprint, jsonify, session
-from models import db, Order  # Assuming Order model is imported correctly
+from models import db, Order 
 
 balance_bp = Blueprint('balance', __name__, url_prefix='/api')
 

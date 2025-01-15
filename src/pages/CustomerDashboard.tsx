@@ -5,6 +5,7 @@ import RestaurantDetails from '../components/customer/RestaurantDetails';
 import Cart from '../components/customer/Cart';
 import OrderHistory from '../components/customer/OrderHistory';
 import CustomerNav from '../components/customer/CustomerNav';
+import Balance from '../components/customer/Balance';
 
 const CustomerDashboard = () => {
   return (
@@ -16,6 +17,7 @@ const CustomerDashboard = () => {
           <Route path="/restaurant/:id" element={<RestaurantDetails />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/balance" element={<Balance />} />
         </Routes>
       </div>
     </div>

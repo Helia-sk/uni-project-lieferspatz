@@ -13,15 +13,16 @@ const Balance = () => {
 
   const loadBalance = async () => {
     try {
-      const response = await apiClient.get<{ balance: number }>('/api/restaurant/balance'); // Call the API endpoint
+      const response = await apiClient.get('/api/customer/balance'); 
       const { balance } = response.data;
   
       if (balance !== undefined) {
-        setBalance(balance); // Set balance from API response
-        setError(null);
+        setBalance(parseFloat(balance)); // Set balance from API response
       } else {
         setError('Balance data not found');
       }
+  
+      setError(null);
     } catch (err) {
       console.error('Failed to load balance:', err);
       setError('Failed to load balance');
@@ -30,8 +31,6 @@ const Balance = () => {
     }
   };
   
-  
-
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -42,7 +41,7 @@ const Balance = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Restaurant Balance</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Customer Balance</h1>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-6">
