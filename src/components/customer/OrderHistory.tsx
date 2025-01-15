@@ -58,9 +58,9 @@ const OrderHistory = () => {
         setOrders(sortedOrders);
       } catch (error) {
         console.error('Error fetching orders:', error);
-        setError('Failed to fetch orders. Please try again later.');
+        setError('No orders found yet');
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     };
 
