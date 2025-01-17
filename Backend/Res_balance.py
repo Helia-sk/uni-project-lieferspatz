@@ -12,15 +12,10 @@ def get_balance():
         return jsonify({'error': 'Unauthorized access'}), 401
 
     try:
-        # Query to calculate the balance dynamically
-        balance = db.session.query(
-            db.func.sum(Order.total_amount - Order.platform_fee)
-        ).filter(
-            Order.restaurant_id == restaurant_id,
-            Order.status.in_(['preparing', 'completed'])
-        ).scalar()
+        # Query to get the balance from the restaurant record
+        balance = db.session.query(Restaurant.balance).filter(Restaurant.id == restaurant_id).scalar()
 
-        # Ensure balance is 0 if no orders are found
+        # Ensure balance is 0 if no balance is found
         balance = balance or 0
 
         return jsonify({'balance': float(balance)}), 200

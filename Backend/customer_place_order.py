@@ -73,8 +73,6 @@ def place_order():
                 return jsonify({'error': f'Missing field: {field}'}), 400
 
         total = Decimal(str(data['total']))
-        platform_fee = (total * Decimal('0.15')).quantize(Decimal('0.01'))
-        restaurant_amount = (total * Decimal('0.85')).quantize(Decimal('0.01'))
 
         # Check if customer has enough balance
         if customer.balance < total:
@@ -83,21 +81,14 @@ def place_order():
         # Deduct total amount from customer's balance
         customer.balance -= total
 
-        # Add platform fee to platform's balance
-        platform = Platform.query.first()
-        if not platform:
-            platform = Platform(balance=0)
-            db.session.add(platform)
-        platform.balance += platform_fee
-
         # Create a new order
         order = Order(
             customer_id=customer_id,
             restaurant_id=data['restaurant_id'],
             status='processing',
             total_amount=total,
-            platform_fee=platform_fee,
-            restaurant_amount=restaurant_amount,
+            platform_fee=Decimal('0.00'),  # Initialize platform fee to 0
+            restaurant_amount=total,  # Initialize restaurant amount to total
             notes=data.get('notes', '')
         )
         db.session.add(order)

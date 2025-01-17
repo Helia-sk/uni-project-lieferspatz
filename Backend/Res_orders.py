@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, session
 import logging
-from models import db, Order, OrderItem, MenuItem, Customer
+from models import db, Order, OrderItem, MenuItem, Customer, Platform, Restaurant
+from decimal import Decimal
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -55,6 +56,29 @@ def accept_order(order_id):
             logging.warning('Order not found. Order ID: %d, Restaurant ID: %s', order_id, restaurant_id)
             return jsonify({'error': 'Order not found'}), 404
 
+        # Calculate platform fee and restaurant amount
+        total = order.total_amount
+        platform_fee = (total * Decimal('0.15')).quantize(Decimal('0.01'))
+        restaurant_amount = (total * Decimal('0.85')).quantize(Decimal('0.01'))
+
+        # Update order with platform fee and restaurant amount
+        order.platform_fee = platform_fee
+        order.restaurant_amount = restaurant_amount
+
+        # Add platform fee to platform's balance
+        platform = Platform.query.first()
+        if not platform:
+            platform = Platform(balance=0)
+            db.session.add(platform)
+        platform.balance += platform_fee
+
+        # Update restaurant's balance
+        restaurant = Restaurant.query.get(restaurant_id)
+        if not restaurant:
+            logging.warning('Restaurant not found. Restaurant ID: %s', restaurant_id)
+            return jsonify({'error': 'Restaurant not found'}), 404
+        restaurant.balance += restaurant_amount
+
         order.status = 'preparing'
         db.session.commit()
         logging.info('Order accepted successfully. Order ID: %d', order_id)
@@ -80,16 +104,24 @@ def reject_order(order_id):
             logging.warning('Order not found. Order ID: %d, Restaurant ID: %s', order_id, restaurant_id)
             return jsonify({'error': 'Order not found'}), 404
 
-        order.status = 'cancelled'  # Use the correct value as per the database constraint
+        # Update the order status to 'cancelled'
+        order.status = 'cancelled'
+
+        # Refund the customer
+        customer = Customer.query.get(order.customer_id)
+        if not customer:
+            logging.warning('Customer not found. Customer ID: %d', order.customer_id)
+            return jsonify({'error': 'Customer not found'}), 404
+
+        customer.balance += order.total_amount
+
         db.session.commit()
-        logging.info('Order rejected successfully. Order ID: %d', order_id)
-        return jsonify({'message': 'Order rejected successfully'}), 200
+        logging.info('Order rejected and customer refunded successfully. Order ID: %d', order_id)
+        return jsonify({'message': 'Order rejected and customer refunded successfully'}), 200
     except Exception as e:
         db.session.rollback()
         logging.error('Failed to reject order: %s', str(e))
         return jsonify({'error': f'Failed to reject order: {str(e)}'}), 500
-
-
 
 
 @orders_bp.route('/<int:order_id>/details', methods=['GET'])
@@ -157,8 +189,6 @@ def get_order_details(order_id):
     except Exception as e:
         logging.error('Failed to fetch order details: %s', str(e))
         return jsonify({'error': f'Failed to fetch order details: {str(e)}'}), 500
-
-       
 
 
 @orders_bp.route('/<int:order_id>/complete', methods=['POST'])
