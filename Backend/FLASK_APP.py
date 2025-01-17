@@ -16,6 +16,7 @@ from customer_login import customer_login_bp
 from customer_reg import customer_register_bp
 from nearby_restaurants import nearby_restaurants_bp
 from cus_balance import cus_balance_bp
+from cus_orders import cus_orders_bp
 #restaurabnt blueprints
 from restaurant_reg import register_bp
 from restaurant_login import login_bp
@@ -78,6 +79,7 @@ def create_app():
     app.register_blueprint(restaurant_details_bp)  
     app.register_blueprint(customer_place_order_bp)
     app.register_blueprint(cus_balance_bp)
+    app.register_blueprint(cus_orders_bp) 
 
     # 8. Add WebSocket event handlers
     @socketio.on('connect')

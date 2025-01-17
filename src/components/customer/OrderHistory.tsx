@@ -39,7 +39,7 @@ const OrderHistory = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await apiClient.get('/api/orders');
+        const response = await apiClient.get('/api/customer/orders/');
         const fetchedOrders: Order[] = response.data;
 
         // Sort orders by creation date and status
@@ -60,7 +60,7 @@ const OrderHistory = () => {
         console.error('Error fetching orders:', error);
         setError('No orders found yet');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
 
@@ -69,7 +69,7 @@ const OrderHistory = () => {
 
   const fetchOrderDetails = async (orderId: number) => {
     try {
-      const response = await apiClient.get(`/api/orders/${orderId}/details`);
+      const response = await apiClient.get(`/api/customer/orders/${orderId}/details`);
       setSelectedOrder(response.data);
       setModalOpen(true);
     } catch (error) {
