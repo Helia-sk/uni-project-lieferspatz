@@ -7,8 +7,11 @@ for Windows:
 4-npm install
 
 for websocket:
-install requirements.txt agaon or only insatll flask_socketio
-in terminal:npm install socket.io-client in terminal
+install requirements.txt agaon or only 
+insatll flask_socketio
+in terminal:
+npm install socket.io-client 
+in terminal
 
 
 command to clean sessions 

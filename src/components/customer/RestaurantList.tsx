@@ -40,7 +40,9 @@ const RestaurantList: React.FC = () => {
       }
 
       const data: Restaurant[] = response.data;
-      setRestaurants(data);
+      // Filter restaurants to include only those that are open
+      const openRestaurants = data.filter(restaurant => restaurant.is_open);
+      setRestaurants(openRestaurants);
     } catch (error) {
       console.error('Failed to load restaurants:', error);
       setError('Failed to load restaurants.');
