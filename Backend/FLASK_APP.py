@@ -9,7 +9,6 @@ from models import db
 from session_config import init_session
 from socketio_instance import socketio
 from logout import logout_bp
-#Customer blueprints
 from customer_restaurant_details import restaurant_details_bp
 from customer_place_order import customer_place_order_bp
 from customer_login import customer_login_bp
@@ -17,7 +16,6 @@ from customer_reg import customer_register_bp
 from nearby_restaurants import nearby_restaurants_bp
 from cus_balance import cus_balance_bp
 from cus_orders import cus_orders_bp
-#restaurabnt blueprints
 from restaurant_reg import register_bp
 from restaurant_login import login_bp
 from Res_opening_hours import settings_bp
@@ -33,19 +31,19 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 def create_app():
     app = Flask(__name__)
 
-    # 1. Configure the app
+    # Configure the app
     basedir = os.path.abspath(os.path.dirname(__file__))
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'database.db')}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.secret_key = 'Hi'
 
-    # 2. Initialize the database
+    # Initialize the database
     db.init_app(app)
 
-    # 3. Initialize session management with the db
+    #Initialize session management with the db
     init_session(app, db)
 
-    # 4. Configure CORS to allow credentials and specify the correct origin
+    # Configure CORS 
     CORS(app, supports_credentials=True, origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -56,14 +54,14 @@ def create_app():
         "http://127.0.0.1:5173"
     ])
 
-    # 5. Initialize WebSockets
+    # Initialize WebSockets
     socketio.init_app(app)
 
-    # 6. Initialize Bcrypt
+    # Initialize Bcrypt
     bcrypt = Bcrypt(app)
     Migrate(app, db)
 
-    # 7. Register Blueprints
+    # Register Blueprints
     app.register_blueprint(register_bp)
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
@@ -81,7 +79,7 @@ def create_app():
     app.register_blueprint(cus_balance_bp)
     app.register_blueprint(cus_orders_bp) 
 
-    # 8. Add WebSocket event handlers
+    # Add WebSocket event handlers
     @socketio.on('connect')
     def handle_connect():
         logging.info("A client connected via WebSocket")
@@ -90,13 +88,13 @@ def create_app():
     def handle_disconnect():
         logging.info("A client disconnected from WebSocket")
 
-    # 9. Utility route to list all available routes
+    # Utility route to list all available routes
     @app.route('/routes', methods=['GET'])
     def list_routes():
         routes = {rule.rule: list(rule.methods) for rule in app.url_map.iter_rules()}
         return jsonify(routes)
 
-    # 10. Log all incoming requests for debugging
+    #Log all incoming requests for debugging
     @app.before_request
     def log_request_info():
         logging.info(f"Received {request.method} request to {request.url}")

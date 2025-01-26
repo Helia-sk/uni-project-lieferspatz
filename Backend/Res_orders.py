@@ -3,7 +3,6 @@ import logging
 from models import db, Order, OrderItem, MenuItem, Customer, Platform, Restaurant
 from decimal import Decimal
 
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 orders_bp = Blueprint('orders', __name__, url_prefix='/api/orders')
@@ -60,8 +59,6 @@ def accept_order(order_id):
         total = order.total_amount
         platform_fee = (total * Decimal('0.15')).quantize(Decimal('0.01'))
         restaurant_amount = (total * Decimal('0.85')).quantize(Decimal('0.01'))
-
-        # Update order with platform fee and restaurant amount
         order.platform_fee = platform_fee
         order.restaurant_amount = restaurant_amount
 
@@ -104,7 +101,7 @@ def reject_order(order_id):
             logging.warning('Order not found. Order ID: %d, Restaurant ID: %s', order_id, restaurant_id)
             return jsonify({'error': 'Order not found'}), 404
 
-        # Update the order status to 'cancelled'
+        
         order.status = 'cancelled'
 
         # Refund the customer
@@ -162,7 +159,6 @@ def get_order_details(order_id):
         )
         logging.debug('Order items fetched from database: %s', items)
 
-        # Format the response
         order_details = {
             'id': order.id,
             'status': order.status,

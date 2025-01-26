@@ -43,7 +43,7 @@ def add_menu_item():
     data = request.get_json()
     logging.info(f"Received POST request to /api/menu with data: {data}")
 
-    # Validate required fields
+   
     required_fields = ['name', 'description', 'price', 'category']
     for field in required_fields:
         if field not in data:
@@ -51,7 +51,7 @@ def add_menu_item():
             return jsonify({'error': f"'{field}' is required."}), 400
 
     try:
-        # Extract and validate data
+       
         name = data['name']
         description = data['description']
         price = float(data['price'])

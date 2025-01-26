@@ -4,12 +4,11 @@ from models import db, Restaurant, ActionLog, DeliveryArea
 from utils import validate_request
 import logging
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 bcrypt = Bcrypt()
 
-# Blueprint for registration
 register_bp = Blueprint('register', __name__, url_prefix='/api')
 
 @register_bp.route('/register', methods=['POST'])
@@ -18,18 +17,17 @@ def register():
         data = request.get_json()
         logging.info(f"Received registration data: {data}")
 
-        # Validate input fields
         validation_error = validate_request(data, ['username', 'password', 'name', 'street', 'postalCode', 'description'])
         if validation_error:
             logging.warning(f"Validation failed: {validation_error}")
             return jsonify(validation_error), 400
 
-        # Check if the username already exists
+
         if Restaurant.query.filter_by(username=data['username']).first():
             logging.warning("Username already exists")
             return jsonify({'error': 'Username already exists'}), 400
 
-        # Hash the password
+        
         hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
 
         # Create and save the new restaurant
@@ -49,7 +47,6 @@ def register():
         delivery_area = DeliveryArea(restaurant_id=new_restaurant.id, postal_code=data['postalCode'])
         db.session.add(delivery_area)
         
-        # Log the registration action
         log = ActionLog(
             action="registration",
             description=f"Registered restaurant: {new_restaurant.name} (username: {new_restaurant.username})"

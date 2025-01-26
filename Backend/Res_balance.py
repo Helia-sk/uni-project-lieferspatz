@@ -12,10 +12,8 @@ def get_balance():
         return jsonify({'error': 'Unauthorized access'}), 401
 
     try:
-        # Query to get the balance from the restaurant record
+        # Get the balance from the restaurant record
         balance = db.session.query(Restaurant.balance).filter(Restaurant.id == restaurant_id).scalar()
-
-        # Ensure balance is 0 if no balance is found
         balance = balance or 0
 
         return jsonify({'balance': float(balance)}), 200

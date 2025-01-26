@@ -2,7 +2,7 @@ import logging
 from flask import Blueprint, jsonify, session, request
 from models import db, OpeningHour, Restaurant
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

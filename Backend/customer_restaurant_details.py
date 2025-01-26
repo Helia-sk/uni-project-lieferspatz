@@ -3,15 +3,13 @@ from models import db, Restaurant, OpeningHour, DeliveryArea, MenuItem, Customer
 from datetime import datetime
 import logging
 
-# Create a Blueprint for restaurant details
+
 restaurant_details_bp = Blueprint('restaurant_details', __name__, url_prefix='/api/restaurant_details')
 
 def is_restaurant_open(restaurant_id):
-    """
-    Check if a restaurant is currently open based on its opening hours.
-    Handles cases where restaurants stay open past midnight.
-    Adjusts Sunday from Python's 6 to database's 0.
-    """
+ 
+   # Check if a restaurant is currently open
+
     now = datetime.now()
     current_day = now.weekday()  # 0=Monday, 6=Sunday
     current_time = now.strftime('%H:%M')  # Current time as "HH:MM"
@@ -21,7 +19,7 @@ def is_restaurant_open(restaurant_id):
 
     logging.info(f"Checking restaurant {restaurant_id} - Current Time: {current_time}, Day (DB Format): {db_day_of_week}")
 
-    # Query the opening hours for the restaurant for the current day (adjusted for database format)
+    # Query the opening hours for the restaurant for the current day
     opening_hours = OpeningHour.query.filter_by(restaurant_id=restaurant_id, day_of_week=db_day_of_week).all()
 
     if not opening_hours:
@@ -34,7 +32,7 @@ def is_restaurant_open(restaurant_id):
 
         logging.info(f"Restaurant {restaurant_id} - Checking: Open {open_time}, Close {close_time}")
 
-        # ✅ Fix Midnight (00:00) Closing Issue
+
         if close_time == "00:00":
             close_time = "23:59"
 
@@ -102,7 +100,7 @@ def get_menu_by_restaurant(restaurant_id):
     Fetch menu items for a specific restaurant based on the restaurant_id.
     """
     logging.info(f'Restaurant ID: {restaurant_id}')
-    # Validate restaurant_id
+    
     if not restaurant_id:
         logging.warning('Missing restaurant_id in request')
         return jsonify({'error': 'restaurant_id is required'}), 400

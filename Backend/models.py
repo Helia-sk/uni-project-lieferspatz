@@ -3,17 +3,16 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-#saving the action logs for restaurant registration
 class ActionLog(db.Model):
     __tablename__ = 'action_logs'
-    id = db.Column(db.Integer, primary_key=True)  # Auto-increment ID
-    action = db.Column(db.String, nullable=False)  # Action performed (e.g., "registration")
-    description = db.Column(db.String, nullable=True)  # Additional details
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # When the action occurred
+    id = db.Column(db.Integer, primary_key=True) 
+    action = db.Column(db.String, nullable=False)  
+    description = db.Column(db.String, nullable=True) 
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)  
     
 
 class Restaurant(db.Model):
-    __tablename__ = 'restaurants'  # Explicitly match the table name in init.sql
+    __tablename__ = 'restaurants' 
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False)
@@ -21,7 +20,7 @@ class Restaurant(db.Model):
     street = db.Column(db.String, nullable=False)
     postal_code = db.Column(db.String, nullable=False)
     description = db.Column(db.Text, nullable=True)
-    image_url = db.Column(db.String, nullable=True)  # Matches `image_url` column
+    image_url = db.Column(db.String, nullable=True)  
     password_hash = db.Column(db.String, nullable=False)
     balance = db.Column(db.Numeric(10, 2), default=0.00)  # Matches DECIMAL(10,2)
 
@@ -71,7 +70,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
-    status = db.Column(db.String, default='processing')  # Matches CHECK constraint
+    status = db.Column(db.String, default='processing')  
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
     platform_fee = db.Column(db.Numeric(10, 2), nullable=False)
     restaurant_amount = db.Column(db.Numeric(10, 2), nullable=False)

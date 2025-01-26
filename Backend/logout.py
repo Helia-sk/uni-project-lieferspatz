@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, session, request
 import logging
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Blueprint for logout
+
 logout_bp = Blueprint('logout', __name__, url_prefix='/api')
 
 @logout_bp.route('/logout', methods=['POST'])

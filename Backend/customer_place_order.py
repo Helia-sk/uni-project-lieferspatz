@@ -5,10 +5,10 @@ import logging
 from flask_socketio import emit
 from socketio_instance import socketio  # Import socketio instance
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO)
 
-# Blueprint for placing orders
+
 customer_place_order_bp = Blueprint('customer_place_order', __name__)
 
 @customer_place_order_bp.route('/api/customer/dashboard/orders/', methods=['GET'])
@@ -43,7 +43,7 @@ def get_order_history():
                 'restaurant_id': order.restaurant_id,
                 'total_amount': float(order.total_amount),
                 'status': order.status,
-                'items': order_items_dict.get(order.id, [])  # Get order items or empty list
+                'items': order_items_dict.get(order.id, []) 
             }
             for order in orders
         ]
@@ -66,7 +66,7 @@ def place_order():
         if not customer:
             return jsonify({'error': 'Customer not found'}), 404
 
-        # Validate request data
+        
         required_fields = ['restaurant_id', 'items', 'total', 'notes']
         for field in required_fields:
             if field not in data:
@@ -78,7 +78,7 @@ def place_order():
         if customer.balance < total:
             return jsonify({'error': 'Insufficient balance'}), 400
 
-        # Deduct total amount from customer's balance
+        # Deduct total amount from balance
         customer.balance -= total
 
         # Create a new order
@@ -92,7 +92,7 @@ def place_order():
             notes=data.get('notes', '')
         )
         db.session.add(order)
-        db.session.flush()  # Flush to get order.id before committing
+        db.session.flush()  
 
         # Add order items
         for item in data['items']:
@@ -106,7 +106,7 @@ def place_order():
 
         db.session.commit()
 
-        # Emit a WebSocket event to notify the restaurant
+        # notify the restaurant
         socketio.emit('new_order', {
             'order_id': order.id,
             'restaurant_id': data['restaurant_id'],

@@ -4,12 +4,10 @@ from models import db, Restaurant
 from utils import validate_request
 import logging
 
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 bcrypt = Bcrypt()
 
-# Blueprint for login
 login_bp = Blueprint('login', __name__, url_prefix='/api')
 
 @login_bp.route('/login', methods=['POST'])
@@ -32,7 +30,7 @@ def login():
             session['username'] = restaurant.username
             session['restaurant_id'] = restaurant.id
             logging.info(f"Login successful for user: {restaurant.username}, Session Data: {dict(session)}")
-             # Log the session cookie value
+            
             session_cookie = request.cookies.get('app_session')
             logging.info(f"Session cookie set: {session_cookie}")
             return jsonify({'message': 'Login successful', 'restaurant_id': restaurant.id}), 200

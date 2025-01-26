@@ -50,7 +50,6 @@ def delete_delivery_area(area_id):
         return jsonify({'error': 'Unauthorized access'}), 401
 
     try:
-        # Fetch the delivery area to delete
         delivery_area = DeliveryArea.query.filter_by(id=area_id, restaurant_id=restaurant_id).first()
         if not delivery_area:
             return jsonify({'error': 'Delivery area not found'}), 404

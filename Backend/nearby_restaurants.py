@@ -16,7 +16,7 @@ def get_nearby_restaurants():
         logging.info('Unauthorized access: No customer_id in session')
         return jsonify({'error': 'Unauthorized access'}), 401
 
-    # Retrieve customer's postal code
+    
     customer = Customer.query.get(customer_id)
     if not customer:
         logging.info(f'Customer not found: id={customer_id}')

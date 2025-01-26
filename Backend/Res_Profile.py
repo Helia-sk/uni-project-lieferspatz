@@ -14,7 +14,6 @@ def get_restaurant():
         if not restaurant:
             return jsonify({'error': 'Restaurant not found'}), 404
 
-        # Return restaurant data as JSON
         return jsonify({
             'id': restaurant.id,
             'name': restaurant.name,
