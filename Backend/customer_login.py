@@ -4,22 +4,20 @@ from models import db, Customer
 from utils import validate_request
 import logging
 
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 bcrypt = Bcrypt()
 
-# Blueprint for customer login
 customer_login_bp = Blueprint('customer_login', __name__)
 
 @customer_login_bp.route('/api/customer/login', methods=['POST'])
 def login():
     try:
-        # Retrieve JSON data from the request
+        
         data = request.get_json()
         logging.info(f"Received customer login data: {data}")
 
-        # Validate input fields
+       
         validation_error = validate_request(data, ['username', 'password'])
         if validation_error:
             logging.warning(f"Validation failed: {validation_error}")
@@ -30,12 +28,12 @@ def login():
 
         # Verify the password
         if customer and bcrypt.check_password_hash(customer.password_hash, data['password']):
-            # Set session details
+           
             session['username'] = customer.username
             session['customer_id'] = customer.id
             logging.info(f"Login successful for customer: {customer.username}, Session Data: {dict(session)}")
 
-            # Log the session cookie value for debugging
+        
             session_cookie = request.cookies.get('app_session')
             logging.info(f"Session cookie set: {session_cookie}")
 

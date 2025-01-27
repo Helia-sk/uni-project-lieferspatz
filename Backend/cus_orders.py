@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, session
 from models import db, Order, OrderItem, MenuItem, Customer
 import logging
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 cus_orders_bp = Blueprint('cus_orders', __name__, url_prefix='/api/customer/orders')
