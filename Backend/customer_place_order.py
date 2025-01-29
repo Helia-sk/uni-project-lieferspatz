@@ -43,7 +43,7 @@ def get_order_history():
                 'restaurant_id': order.restaurant_id,
                 'total_amount': float(order.total_amount),
                 'status': order.status,
-                'items': order_items_dict.get(order.id, [])  # Get order items or empty list
+                'items': order_items_dict.get(order.id, [])  
             }
             for order in orders
         ]

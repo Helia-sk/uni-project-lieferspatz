@@ -1,7 +1,7 @@
 
 from flask import Blueprint, jsonify, session
 from models import Restaurant
-from models import db, Order,Customer	  # Assuming Order model is imported correctly
+from models import db, Order,Customer	 
 
 cus_balance_bp = Blueprint('cbalance', __name__, url_prefix='/api')
 
@@ -16,7 +16,7 @@ def get_balance():
         # Query to get the balance 
         balance = db.session.query(Customer.balance).filter(Customer.id == customer_id).scalar()
 
-        # Ensure balance is 0 if no orders are found
+        # If the balance is None, set it to 0
         balance = balance or 0
 
         return jsonify({'balance': float(balance)}), 200

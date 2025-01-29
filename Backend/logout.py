@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, session, request
 import logging
 
-# Set up logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Blueprint for logout
@@ -9,7 +9,7 @@ logout_bp = Blueprint('logout', __name__, url_prefix='/api')
 
 @logout_bp.route('/logout', methods=['POST'])
 def logout():
-    logging.info(f"Session data at logout: {dict(session)}")  # Log current session data
+    logging.info(f"Session data at logout: {dict(session)}")  
     try:
 
         session_cookie = request.cookies.get('app_session')

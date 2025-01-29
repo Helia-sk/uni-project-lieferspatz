@@ -42,7 +42,7 @@ def login():
             return jsonify({
                 'message': 'Login successful',
                 'customer_id': customer.id,
-                'postal_code': customer.postal_code  # Assuming postal_code is a column in the Customer model
+                'postal_code': customer.postal_code  
             }), 200
 
         logging.warning("Invalid username or password")

@@ -20,8 +20,8 @@ const Orders = () => {
 
   useSocket((data) => {
     setNotification('You have a new order!');
-    setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
-    fetchOrders(); // Fetch orders again to update the list
+    setTimeout(() => setNotification(null), 5000); 
+    fetchOrders(); 
   });
 
   const fetchOrders = async () => {
@@ -37,7 +37,7 @@ const Orders = () => {
 
         if (newOrders.length > 0) {
           setNotification(`You have ${newOrders.length} new order(s)!`);
-          setTimeout(() => setNotification(null), 5000); // Hide notification after 5 seconds
+          setTimeout(() => setNotification(null), 5000); //  5 seconds
         }
       }
 
@@ -54,7 +54,7 @@ const Orders = () => {
   useEffect(() => {
     // Initial fetch (Removed polling)
     fetchOrders();
-  }, []); // ✅ Runs **only once** when the component mounts
+  }, []); 
 
   const handleAcceptOrder = async (orderId: number) => {
     try {

@@ -16,7 +16,7 @@ def is_restaurant_open(restaurant_id):
     current_day = now.weekday()  # 0=Monday, 6=Sunday
     current_time = now.strftime('%H:%M')  # Current time as "HH:MM"
 
-    # ✅ Convert Python's weekday format to match the database (Sunday = 0, Monday = 1, etc.)
+    
     db_day_of_week = (current_day + 1) % 7  # Converts: Python 0=Monday -> DB 1, Python 6=Sunday -> DB 0
 
     logging.info(f"Checking restaurant {restaurant_id} - Current Time: {current_time}, Day (DB Format): {db_day_of_week}")
@@ -25,31 +25,31 @@ def is_restaurant_open(restaurant_id):
     opening_hours = OpeningHour.query.filter_by(restaurant_id=restaurant_id, day_of_week=db_day_of_week).all()
 
     if not opening_hours:
-        logging.warning(f"⚠️ No opening hours found for restaurant {restaurant_id} on day {db_day_of_week}")
+        logging.warning(f" No opening hours found for restaurant {restaurant_id} on day {db_day_of_week}")
         return False  # No hours found, so it's closed
 
     for hours in opening_hours:
-        open_time = hours.open_time  # Stored as HH:MM
-        close_time = hours.close_time  # Stored as HH:MM
+        open_time = hours.open_time 
+        close_time = hours.close_time  
 
         logging.info(f"Restaurant {restaurant_id} - Checking: Open {open_time}, Close {close_time}")
 
-        # ✅ Fix Midnight (00:00) Closing Issue
+        
         if close_time == "00:00":
             close_time = "23:59"
 
-        # Normal case (same-day closing)
+        
         if open_time <= current_time <= close_time:
-            logging.info(f"✅ Restaurant {restaurant_id} is OPEN")
+            logging.info(f" Restaurant {restaurant_id} is OPEN")
             return True
 
-        # Overnight case (e.g., 22:00 - 03:00)
+       
         if open_time > close_time:  # If restaurant closes after midnight
             if current_time >= open_time or current_time <= close_time:
-                logging.info(f"✅ Restaurant {restaurant_id} is OPEN (overnight case)")
+                logging.info(f" Restaurant {restaurant_id} is OPEN (overnight case)")
                 return True
 
-    logging.info(f"❌ Restaurant {restaurant_id} is CLOSED")
+    logging.info(f" Restaurant {restaurant_id} is CLOSED")
     return False
 
 

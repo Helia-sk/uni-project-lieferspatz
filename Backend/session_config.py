@@ -12,7 +12,7 @@ def init_session(app, db):
     app.config['SESSION_KEY_PREFIX'] = 'session:'
     app.config['SESSION_COOKIE_NAME'] = 'app_session'
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production
+    app.config['SESSION_COOKIE_SECURE'] = False  
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
     # Initialize Flask-Session
