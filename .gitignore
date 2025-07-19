@@ -72,6 +72,15 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Database files (Lieferspatz specific)
+Backend/database.db
+Backend/database.db-journal
+Backend/*.db
+Backend/*.db-journal
+*.sqlite
+*.sqlite3
+session_logs/
+
 # Flask stuff:
 instance/
 
